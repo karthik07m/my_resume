@@ -92,33 +92,13 @@ export default function Hero() {
                         </p>
                     </div>
 
-                    {/* Stats Panel */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="flex flex-wrap justify-start gap-8 md:gap-12 py-6 border-t border-b border-white/10 w-full"
-                    >
-                        {[
-                            { label: 'Chakra', val: '∞' },
-                            { label: 'Willpower', val: 'MAX' },
-                            { label: 'Speed', val: 'S+' },
-                            { label: 'Ramen', val: '100%' }
-                        ].map((stat, i) => (
-                            <div key={i} className="flex flex-col gap-1 items-start">
-                                <div className="text-[10px] text-white/40 uppercase tracking-[0.2em]">{stat.label}</div>
-                                <div className="text-2xl md:text-3xl font-black tabular-nums text-green-500">{stat.val}</div>
-                            </div>
-                        ))}
-                    </motion.div>
-
                     {/* CTA Buttons */}
-                    <motion.div className="flex flex-col sm:flex-row gap-6">
+                    <motion.div className="flex flex-col sm:flex-row gap-6 mt-8">
                         <MagneticButton
                             onClick={() => scrollToSection('experience')}
                             className="px-10 py-4 bg-white text-black font-bold text-sm tracking-widest hover:bg-gray-200 transition-colors"
                         >
-                            MISSION LOG
+                            SIDE PROJECTS
                         </MagneticButton>
 
                         <MagneticButton
