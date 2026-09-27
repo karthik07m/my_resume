@@ -23,7 +23,7 @@ export default function Experience() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter text-white"
+                        className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-white"
                     >
                         EXPERIENCE <span className="text-red-500">LOG</span>
                     </motion.h2>

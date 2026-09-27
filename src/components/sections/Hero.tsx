@@ -98,7 +98,7 @@ export default function Hero() {
                             </span>
                         </motion.div>
 
-                        <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] text-white">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
                             {firstName}
                             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 pb-1">
                                 {lastName}

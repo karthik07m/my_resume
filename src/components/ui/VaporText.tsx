@@ -21,7 +21,7 @@ export default function VaporText({ texts, className = '' }: { texts: string[]; 
                     animate={{ opacity: 1, filter: 'blur(0px)', letterSpacing: '0em', y: 0 }}
                     exit={{ opacity: 0, filter: 'blur(14px)', letterSpacing: '0.6em', y: -16 }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
-                    className="absolute inset-0 text-[28px] font-bold text-green-500 whitespace-nowrap"
+                    className="absolute inset-0 text-2xl font-bold text-green-500 whitespace-nowrap"
                 >
                     {texts[index]}
                 </motion.h2>

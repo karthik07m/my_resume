@@ -62,7 +62,7 @@ export default function SageMode() {
                     className="fixed inset-0 z-[150] pointer-events-none flex items-center justify-center bg-orange-500/15 backdrop-blur-[2px] px-6"
                 >
                     <div className="animate-shake text-center">
-                        <div className="text-4xl sm:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-300 to-orange-500 drop-shadow-[0_0_30px_rgba(255,153,0,0.6)]">
+                        <div className="text-3xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-300 to-orange-500 drop-shadow-[0_0_30px_rgba(255,153,0,0.6)]">
                             {banner}
                         </div>
                         <div className="mt-3 font-mono text-xs sm:text-sm tracking-[0.4em] uppercase text-orange-200/80">

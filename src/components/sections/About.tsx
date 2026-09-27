@@ -32,7 +32,7 @@ export default function About() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-5xl sm:text-6xl md:text-8xl font-black mb-6 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 drop-shadow-lg">
+                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 drop-shadow-lg">
                             THE CODE I LIVE BY
                         </h2>
                         <div className="h-1 w-32 bg-orange-500 rounded-full mb-8" />

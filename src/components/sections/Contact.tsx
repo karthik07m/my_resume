@@ -39,7 +39,7 @@ export default function Contact() {
                     {/* Demon Slayer Aesthetic Header */}
                     <div className="inline-block relative">
                         <div className="absolute inset-0 bg-pink-500/20 blur-xl rounded-full" />
-                        <h2 className="relative text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter text-white mb-2">
+                        <h2 className="relative text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white mb-2">
                             BREATH OF <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">CODE</span>
                         </h2>
                         <p className="text-base sm:text-xl text-white/60 font-mono tracking-widest uppercase">First Form: Contact</p>
