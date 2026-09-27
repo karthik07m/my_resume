@@ -2,6 +2,7 @@
 
 import { useRef, useState, MouseEvent as ReactMouseEvent } from 'react'
 import { motion } from 'framer-motion'
+import { sfx } from '@/lib/sfx'
 
 interface MagneticButtonProps {
     children: React.ReactNode
@@ -39,6 +40,7 @@ export default function MagneticButton({ children, className = '', onClick }: Ma
 
     const handleMouseEnter = () => {
         setIsHovered(true)
+        sfx.hover()
     }
 
     return (

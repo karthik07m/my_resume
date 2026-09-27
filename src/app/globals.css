@@ -3,7 +3,7 @@
 :root {
   --background: #050505;
   --foreground: #ededed;
-  
+
   /* Anime Theme Colors */
   --neon-blue: #00f3ff;
   --neon-purple: #bc13fe;
@@ -20,13 +20,14 @@
   --color-neon-orange: var(--neon-orange);
   --color-neon-green: var(--neon-green);
   --color-void-black: var(--void-black);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
   --animate-power-pulse: power-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-shake: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  --animate-spin-slow: spin 6s linear infinite;
 
   @keyframes power-pulse {
     0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--neon-blue); }
@@ -37,7 +38,7 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
   }
-  
+
   @keyframes shake {
     10%, 90% { transform: translate3d(-1px, 0, 0); }
     20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -46,10 +47,14 @@
   }
 }
 
+html {
+  scroll-padding-top: 6rem;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
   overflow-x: hidden;
 }
 
@@ -69,4 +74,13 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neon-blue);
+}
+
+/* Sage Mode (Konami code / type "sage" / tap the hero badge 3x): shift the whole palette to orange and gold. */
+html[data-sage] .sage-shift {
+  filter: hue-rotate(-120deg) saturate(1.25);
+  transition: filter 0.6s ease;
+}
+.sage-shift {
+  transition: filter 0.6s ease;
 }

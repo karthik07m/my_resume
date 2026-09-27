@@ -1,151 +1,136 @@
 "use client";
 
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { FontLoader, TextGeometry, MeshSurfaceSampler } from "three-stdlib";
+import type { Font } from "three-stdlib";
 
-type ShapeType = "sphere" | "cube" | "appian";
+export const FORMS = ["Sphere", "Cube", "Appian", "Torus", "Heart", "Shuriken", "MK"] as const;
+const COUNT = 6000;
+const FONT_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/fonts/helvetiker_bold.typeface.json`;
 
-export function CodingShape() {
+// Deterministic LCG so the point cloud is identical on every render (React compiler forbids Math.random here).
+const makeRand = (seed: number) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+
+const fromText = (font: Font, text: string, size: number) => {
+    const out = new Float32Array(COUNT * 3);
+    const geometry = new TextGeometry(text, { font, size, height: 0.15, curveSegments: 8 });
+    geometry.center();
+    const sampler = new MeshSurfaceSampler(new THREE.Mesh(geometry)).build();
+    const v = new THREE.Vector3();
+    for (let i = 0; i < COUNT; i++) {
+        sampler.sample(v);
+        out.set([v.x, v.y, v.z], i * 3);
+    }
+    geometry.dispose();
+    return out;
+};
+
+const buildForms = (font: Font) => {
+    const rand = makeRand(1);
+    const sphere = new Float32Array(COUNT * 3);
+    const cube = new Float32Array(COUNT * 3);
+    const torus = new Float32Array(COUNT * 3);
+    const heart = new Float32Array(COUNT * 3);
+    const shuriken = new Float32Array(COUNT * 3);
+    const v = new THREE.Vector3();
+
+    for (let i = 0; i < COUNT; i++) {
+        // Sphere: Fibonacci lattice
+        const phi = Math.acos(-1 + (2 * i) / COUNT);
+        const theta = Math.sqrt(COUNT * Math.PI) * phi;
+        v.setFromSphericalCoords(2, phi, theta);
+        sphere.set([v.x, v.y, v.z], i * 3);
+
+        // Cube: random point projected onto the surface
+        v.set(rand() - 0.5, rand() - 0.5, rand() - 0.5);
+        v.multiplyScalar(2 / Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z)));
+        cube.set([v.x, v.y, v.z], i * 3);
+
+        // Torus: R = 1.5, r = 0.55
+        const u = rand() * Math.PI * 2, w = rand() * Math.PI * 2;
+        torus.set([(1.5 + 0.55 * Math.cos(w)) * Math.cos(u), (1.5 + 0.55 * Math.cos(w)) * Math.sin(u), 0.55 * Math.sin(w)], i * 3);
+
+        // Heart: filled classic heart curve, thin slab
+        const t = rand() * Math.PI * 2, s = Math.sqrt(rand());
+        const hx = 16 * Math.pow(Math.sin(t), 3);
+        const hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        heart.set([(hx * s) / 8, (hy * s) / 8 + 0.2, (rand() - 0.5) * 0.4], i * 3);
+
+        // Shuriken: 4-point star, radius follows a triangle wave, filled, thin slab with a center hole
+        const a = rand() * Math.PI * 2;
+        const wave = 1 - Math.abs(((a * 4) / Math.PI) % 2 - 1); // 0 at valleys, 1 at points
+        const rMax = 0.7 + 1.6 * wave;
+        const r = 0.35 + (rMax - 0.35) * Math.sqrt(rand());
+        shuriken.set([r * Math.cos(a), r * Math.sin(a), (rand() - 0.5) * 0.2], i * 3);
+    }
+
+    return [sphere, cube, fromText(font, "Appian", 0.9), torus, heart, shuriken, fromText(font, "MK", 1.6)];
+};
+
+interface Props {
+    form: number
+    onTap: () => void
+}
+
+// A particle cloud that morphs between FORMS on tap and can be dragged to rotate.
+export function CodingShape({ form, onTap }: Props) {
     const points = useRef<THREE.Points>(null!);
-    const [shape, setShape] = useState<ShapeType>("sphere");
+    const font = useLoader(FontLoader, FONT_URL);
+    const forms = useMemo(() => buildForms(font), [font]);
+    const buffer = useMemo(() => new Float32Array(forms[0]), [forms]);
 
-    // Load font
-    const font = useLoader(FontLoader, "https://threejs.org/examples/fonts/helvetiker_bold.typeface.json");
+    const spin = useRef(0); // accumulated rotation, so a speed change never jumps
 
-    // Target positions for each shape
-    const positions = useMemo(() => {
-        const count = 6000; // Increased for longer text
-        const sphere = new Float32Array(count * 3);
-        const cube = new Float32Array(count * 3);
-        const appian = new Float32Array(count * 3);
-
-        const spherical = new THREE.Spherical();
-        const vector = new THREE.Vector3();
-
-        // 1. Sphere Generation
-        for (let i = 0; i < count; i++) {
-            const phi = Math.acos(-1 + (2 * i) / count);
-            const theta = Math.sqrt(count * Math.PI) * phi;
-            spherical.set(2, phi, theta);
-            vector.setFromSpherical(spherical);
-            sphere[i * 3] = vector.x;
-            sphere[i * 3 + 1] = vector.y;
-            sphere[i * 3 + 2] = vector.z;
-        }
-
-        // 2. Cube Generation
-        for (let i = 0; i < count; i++) {
-            const x = (Math.random() - 0.5) * 3;
-            const y = (Math.random() - 0.5) * 3;
-            const z = (Math.random() - 0.5) * 3;
-            const maxVal = Math.max(Math.abs(x), Math.abs(y), Math.abs(z));
-            const scale = 2 / maxVal;
-            cube[i * 3] = x * scale;
-            cube[i * 3 + 1] = y * scale;
-            cube[i * 3 + 2] = z * scale;
-        }
-
-        // 3. Appian Text Generation
-        if (font) {
-            const geometry = new TextGeometry("Senior Appian\nDeveloper", {
-                font: font,
-                size: 0.5, // Smaller size for longer text
-                height: 0.1,
-                curveSegments: 12,
-                bevelEnabled: true,
-                bevelThickness: 0.02,
-                bevelSize: 0.01,
-                bevelOffset: 0,
-                bevelSegments: 5,
-            } as any);
-
-            geometry.center();
-
-            // Create a mesh to sample from
-            const material = new THREE.MeshBasicMaterial();
-            const mesh = new THREE.Mesh(geometry, material);
-            const sampler = new MeshSurfaceSampler(mesh).build();
-            const tempPosition = new THREE.Vector3();
-
-            for (let i = 0; i < count; i++) {
-                sampler.sample(tempPosition);
-                appian[i * 3] = tempPosition.x * 1.2;
-                appian[i * 3 + 1] = tempPosition.y * 1.2;
-                appian[i * 3 + 2] = tempPosition.z * 1.2;
-            }
-        }
-
-        return { sphere, cube, appian };
-    }, [font]);
-
-    // Current buffer positions
-    const bufferPositions = useMemo(() => new Float32Array(positions.sphere), [positions]);
-
-    useFrame((state) => {
+    useFrame((state, delta) => {
         const t = state.clock.getElapsedTime();
-
-        if (shape !== 'appian') {
-            // Rotation for Sphere/Cube
-            points.current.rotation.y = t * 0.1;
-            points.current.rotation.z = t * 0.05;
+        const obj = points.current;
+        // Sage Mode (see ui/SageMode.tsx) spins everything 4x faster.
+        const speed = document.documentElement.hasAttribute("data-sage") ? 4 : 1;
+        spin.current += delta * speed;
+        const s = spin.current;
+        const isText = FORMS[form] === "Appian" || FORMS[form] === "MK";
+        if (isText) {
+            obj.rotation.set(0, 0, 0);
+            obj.position.y = Math.sin(t * 0.5) * 0.1;
+        } else if (FORMS[form] === "Shuriken") {
+            obj.rotation.set(0, 0, s * 1.5);
+            obj.position.y = 0;
+        } else if (FORMS[form] === "Heart") {
+            const beat = 1 + 0.05 * Math.max(0, Math.sin(s * 4));
+            obj.scale.set(beat, beat, beat);
+            obj.rotation.set(0, Math.sin(s * 0.5) * 0.3, 0);
+            obj.position.y = 0;
         } else {
-            // Gentle Float (No Rotation) for Text
-            points.current.rotation.y = 0;
-            points.current.rotation.z = 0;
-            points.current.position.y = Math.sin(t * 0.5) * 0.1;
+            obj.rotation.y = s * 0.1;
+            obj.rotation.z = s * 0.05;
+            obj.position.y = 0;
         }
+        if (FORMS[form] !== "Heart") obj.scale.set(1, 1, 1);
 
-        // Morphing Logic
-        const target = positions[shape];
-        const current = points.current.geometry.attributes.position.array as Float32Array;
-
-        // Lerp factor
-        const lerpSpeed = 0.05;
-
+        const target = forms[form];
+        const current = obj.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < current.length; i++) {
-            current[i] += (target[i] - current[i]) * lerpSpeed;
+            current[i] += (target[i] - current[i]) * 0.05;
         }
-
-        points.current.geometry.attributes.position.needsUpdate = true;
+        obj.geometry.attributes.position.needsUpdate = true;
     });
-
-    const handleClick = () => {
-        setShape(prev => {
-            if (prev === "sphere") return "cube";
-            if (prev === "cube") return "appian";
-            return "sphere";
-        });
-    };
 
     return (
         <>
-            <OrbitControls enableZoom={true} enablePan={false} autoRotate={false} />
+            <OrbitControls enableZoom={false} enablePan={false} />
             <points
                 ref={points}
-                onClick={handleClick}
-                onPointerOver={() => document.body.style.cursor = 'pointer'}
-                onPointerOut={() => document.body.style.cursor = 'auto'}
+                onClick={onTap}
+                onPointerOver={() => (document.body.style.cursor = "pointer")}
+                onPointerOut={() => (document.body.style.cursor = "auto")}
             >
                 <bufferGeometry>
-                    <bufferAttribute
-                        attach="attributes-position"
-                        count={bufferPositions.length / 3}
-                        array={bufferPositions}
-                        itemSize={3}
-                        args={[bufferPositions, 3]}
-                    />
+                    <bufferAttribute attach="attributes-position" args={[buffer, 3]} />
                 </bufferGeometry>
-                <pointsMaterial
-                    size={0.04}
-                    color="#22c55e"
-                    sizeAttenuation={true}
-                    transparent={true}
-                    opacity={0.8}
-                    blending={THREE.AdditiveBlending}
-                />
+                <pointsMaterial size={0.04} color="#34d399" sizeAttenuation transparent opacity={0.8} blending={THREE.AdditiveBlending} />
             </points>
         </>
     );

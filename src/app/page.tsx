@@ -1,78 +1,49 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { MotionConfig } from 'framer-motion'
+import { Stars } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
 import Experience from '@/components/sections/Experience'
-import Work from '@/components/sections/Work'
+import Projects from '@/components/sections/Projects'
 import Contact from '@/components/sections/Contact'
 import Navigation from '@/components/ui/Navigation'
-import { Stars } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
+import QuestLog from '@/components/ui/QuestLog'
+import Loader from '@/components/ui/Loader'
+import SageMode from '@/components/ui/SageMode'
+import SoundToggle from '@/components/ui/SoundToggle'
+import CursorTrail from '@/components/effects/CursorTrail'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState<string>('hero')
-
-  useEffect(() => {
-    let ticking = false
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const sections = ['hero', 'about', 'experience', 'work', 'contact']
-
-          // Find the section that is currently most visible
-          for (const section of sections) {
-            const element = document.getElementById(section)
-            if (element) {
-              const rect = element.getBoundingClientRect()
-              // If the top of the section is within the viewport (with some buffer)
-              if (rect.top >= -window.innerHeight / 2 && rect.top < window.innerHeight / 2) {
-                setActiveSection(section as string)
-                break
-              }
-            }
-          }
-          ticking = false
-        })
-        ticking = true
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const hasMouse = useMediaQuery('(pointer: fine)')
   return (
-    <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
-      {/* Background Stars (Kept for ambiance, but no models) */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas camera={{ position: [0, 0, 1] }}>
-          <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-        </Canvas>
-      </div>
+    <MotionConfig reducedMotion="user">
+      <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
+        {/* Background Stars */}
+        <div className="fixed inset-0 z-0 pointer-events-none sage-shift" aria-hidden>
+          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]}>
+            <Stars radius={100} depth={50} count={isDesktop ? 5000 : 1500} factor={4} saturation={0} fade speed={1} />
+          </Canvas>
+        </div>
 
-      {/* Navigation */}
-      <Navigation />
+        <Loader />
+        <Navigation />
+        <QuestLog />
+        <SageMode />
+        <SoundToggle />
+        {hasMouse && <CursorTrail />}
 
-      {/* Scrollable Content */}
-      <div className="relative z-10">
-        <div id="hero">
-          <Hero />
+        <div className="relative z-10 sage-shift">
+          <div id="hero"><Hero /></div>
+          <div id="about"><About /></div>
+          <div id="experience"><Experience /></div>
+          <div id="projects"><Projects /></div>
+          <div id="contact"><Contact /></div>
         </div>
-        <div id="about">
-          <About />
-        </div>
-        <div id="experience">
-          <Experience />
-        </div>
-        <div id="work">
-          <Work />
-        </div>
-        <div id="contact">
-          <Contact />
-        </div>
-      </div>
-    </main>
-  );
+      </main>
+    </MotionConfig>
+  )
 }
