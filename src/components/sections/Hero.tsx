@@ -100,10 +100,30 @@ export default function Hero() {
                             </span>
                         </motion.div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
-                            {firstName}
-                            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 pb-1">
-                                {lastName}
+                        <h1 aria-label={resume.name} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] text-white">
+                            {/* Anime title card: each letter rises out of a mask */}
+                            <span className="block overflow-hidden pb-1" aria-hidden>
+                                {[...firstName].map((ch, i) => (
+                                    <motion.span
+                                        key={i}
+                                        className="inline-block"
+                                        initial={{ y: '110%', opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.15 + i * 0.035, type: 'spring', stiffness: 260, damping: 22 }}
+                                    >
+                                        {ch === ' ' ? '\u00A0' : ch}
+                                    </motion.span>
+                                ))}
+                            </span>
+                            <span className="block overflow-hidden pb-1" aria-hidden>
+                                <motion.span
+                                    className="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"
+                                    initial={{ y: '110%' }}
+                                    animate={{ y: 0 }}
+                                    transition={{ delay: 0.2 + firstName.length * 0.035, type: 'spring', stiffness: 200, damping: 24 }}
+                                >
+                                    {lastName}
+                                </motion.span>
                             </span>
                         </h1>
                     </div>
@@ -120,14 +140,20 @@ export default function Hero() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
+                        transition={{ delay: 0.7 }}
                         className="grid grid-cols-4 sm:flex sm:flex-wrap justify-start gap-3 sm:gap-8 md:gap-12 py-5 sm:py-6 border-t border-b border-white/10 w-full"
                     >
-                        {STATS.map((stat) => (
-                            <div key={stat.label} className="flex flex-col gap-1 items-start">
+                        {STATS.map((stat, i) => (
+                            <motion.div
+                                key={stat.label}
+                                initial={{ opacity: 0, y: 14 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.8 + i * 0.06, type: 'spring', stiffness: 220, damping: 24 }}
+                                className="flex flex-col gap-1 items-start"
+                            >
                                 <div className="text-[10px] text-white/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] whitespace-nowrap">{stat.label}</div>
                                 <div className="text-xl sm:text-2xl md:text-3xl font-black tabular-nums text-green-500">{stat.val}</div>
-                            </div>
+                            </motion.div>
                         ))}
                     </motion.div>
 

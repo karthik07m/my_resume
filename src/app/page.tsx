@@ -21,7 +21,7 @@ export default function Home() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const hasMouse = useMediaQuery('(pointer: fine)')
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="user" transition={{ type: 'spring', stiffness: 200, damping: 26 }}>
       <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
         {/* Background Stars */}
         <div className="fixed inset-0 z-0 pointer-events-none sage-shift" aria-hidden>

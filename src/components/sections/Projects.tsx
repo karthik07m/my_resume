@@ -37,10 +37,11 @@ export default function Projects() {
                             href={project.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
+                            initial={{ opacity: 0, y: 28, scale: 0.96 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            whileHover={{ y: -6 }}
+                            viewport={{ once: true, margin: '-10%' }}
+                            transition={{ delay: i * 0.08, type: 'spring', stiffness: 220, damping: 24 }}
                             className="group relative p-6 rounded-xl bg-black/40 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-900/10 transition-all duration-300 backdrop-blur-md overflow-hidden flex flex-col"
                         >
                             {/* System Window Effect: top bar + corner brackets */}

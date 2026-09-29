@@ -38,7 +38,7 @@ export default function QuestLog() {
                     if (count === QUESTS.length) {
                         toast.push({ id: count * 2 + 1, kicker: '[SYSTEM] Achievement', text: 'Phantom Sixth Man: you saw everything 🏆' })
                     }
-                    if (toast.length) { setToasts((t) => [...t, ...toast]); sfx.levelUp() }
+                    if (toast.length) { setToasts((t) => [...t, ...toast].slice(-2)); sfx.levelUp() }
                 }
             },
             // Fire when any part of a section overlaps the middle band of the viewport,
@@ -55,7 +55,7 @@ export default function QuestLog() {
     // Auto-dismiss toasts
     useEffect(() => {
         if (!toasts.length) return
-        const timer = setTimeout(() => setToasts((t) => t.slice(1)), 2600)
+        const timer = setTimeout(() => setToasts((t) => t.slice(1)), 2000)
         return () => clearTimeout(timer)
     }, [toasts])
 
@@ -85,13 +85,13 @@ export default function QuestLog() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                            className="relative px-5 py-3 rounded-md bg-blue-950/90 border border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur text-left"
+                            className="relative max-w-[18rem] px-4 py-2 rounded-md bg-blue-950/90 border border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur text-left"
                         >
                             {['top-1 left-1 border-t-2 border-l-2', 'top-1 right-1 border-t-2 border-r-2', 'bottom-1 left-1 border-b-2 border-l-2', 'bottom-1 right-1 border-b-2 border-r-2'].map((c) => (
                                     <span key={c} aria-hidden className={`absolute w-3 h-3 border-blue-400/80 ${c}`} />
                                 ))}
                             <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">{toast.kicker}</div>
-                            <div className="text-sm font-bold text-white">{toast.text}</div>
+                            <div className="text-xs sm:text-sm font-bold text-white">{toast.text}</div>
                         </motion.div>
                     ))}
                 </AnimatePresence>

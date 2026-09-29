@@ -26,7 +26,7 @@ export default function MagneticButton({ children, className = '', onClick }: Ma
         const distanceY = e.clientY - centerY
 
         // Stronger magnetic effect for anime feel
-        const strength = 0.5
+        const strength = 0.25
         setPosition({
             x: distanceX * strength,
             y: distanceY * strength
@@ -58,7 +58,7 @@ export default function MagneticButton({ children, className = '', onClick }: Ma
             transition={{
                 type: 'spring',
                 stiffness: 200,
-                damping: 10,
+                damping: 15,
                 mass: 0.1
             }}
             whileTap={{ scale: 0.9 }}
