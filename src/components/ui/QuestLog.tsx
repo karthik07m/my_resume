@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useScroll } from 'framer-motion'
 import { sfx } from '@/lib/sfx'
 
@@ -18,28 +18,27 @@ type Toast = { id: number; kicker: string; text: string }
 // XP bar across the top that fills with scroll, plus "quest unlocked" toasts when each section is reached.
 export default function QuestLog() {
     const { scrollYProgress } = useScroll()
-    const [unlocked, setUnlocked] = useState<string[]>([])
+    const [unlocked, setUnlocked] = useState(0)
     const [toasts, setToasts] = useState<Toast[]>([])
+    const seen = useRef(new Set<string>())
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
                 for (const entry of entries) {
-                    if (!entry.isIntersecting) continue
                     const id = entry.target.id
-                    setUnlocked((prev) => {
-                        if (prev.includes(id)) return prev
-                        const next = [...prev, id]
-                        const quest = QUESTS.find((q) => q.id === id)
-                        const toast: Toast[] = quest && id !== 'hero'
-                            ? [{ id: Date.now(), kicker: `[SYSTEM] Quest unlocked · LV ${next.length}`, text: quest.name }]
-                            : []
-                        if (next.length === QUESTS.length) {
-                            toast.push({ id: Date.now() + 1, kicker: '[SYSTEM] Achievement', text: 'Phantom Sixth Man: you saw everything 🏆' })
-                        }
-                        if (toast.length) { setToasts((t) => [...t, ...toast]); sfx.levelUp() }
-                        return next
-                    })
+                    if (!entry.isIntersecting || seen.current.has(id)) continue
+                    seen.current.add(id)
+                    const count = seen.current.size
+                    setUnlocked(count)
+                    const quest = QUESTS.find((q) => q.id === id)
+                    const toast: Toast[] = quest && id !== 'hero'
+                        ? [{ id: count * 2, kicker: `[SYSTEM] Quest unlocked · LV ${count}`, text: quest.name }]
+                        : []
+                    if (count === QUESTS.length) {
+                        toast.push({ id: count * 2 + 1, kicker: '[SYSTEM] Achievement', text: 'Phantom Sixth Man: you saw everything 🏆' })
+                    }
+                    if (toast.length) { setToasts((t) => [...t, ...toast]); sfx.levelUp() }
                 }
             },
             // Fire when any part of a section overlaps the middle band of the viewport,
@@ -72,7 +71,7 @@ export default function QuestLog() {
 
             {/* Level badge */}
             <div className="fixed bottom-4 right-4 z-[60] px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-green-500/30 font-mono text-[11px] text-green-400 tracking-widest pointer-events-none">
-                PLAYER LV {unlocked.length}/{QUESTS.length}
+                PLAYER LV {unlocked}/{QUESTS.length}
             </div>
 
             {/* Toasts */}
@@ -86,9 +85,12 @@ export default function QuestLog() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                            className="px-4 py-3 rounded-xl bg-zinc-900/95 border border-green-500/40 shadow-lg shadow-green-500/10 backdrop-blur text-left"
+                            className="relative px-5 py-3 rounded-md bg-blue-950/90 border border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur text-left"
                         >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-green-400">{toast.kicker}</div>
+                            {['top-1 left-1 border-t-2 border-l-2', 'top-1 right-1 border-t-2 border-r-2', 'bottom-1 left-1 border-b-2 border-l-2', 'bottom-1 right-1 border-b-2 border-r-2'].map((c) => (
+                                    <span key={c} aria-hidden className={`absolute w-3 h-3 border-blue-400/80 ${c}`} />
+                                ))}
+                            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">{toast.kicker}</div>
                             <div className="text-sm font-bold text-white">{toast.text}</div>
                         </motion.div>
                     ))}

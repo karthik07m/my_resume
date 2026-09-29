@@ -3,6 +3,7 @@
 import Section from '@/components/ui/Section'
 import resume from '@/data/resume.json'
 import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 
 // Anime names for the skill groups in resume.json, in order.
 const groupTheme = [
@@ -11,6 +12,41 @@ const groupTheme = [
     { name: 'The Zone', icon: '🏀' },
     { name: 'Sage Mode', icon: '☁️' },
 ]
+
+// Akashi's Emperor Eye: red and gold eyes that follow the pointer, so the section literally sees your next move.
+function EmperorEye() {
+    const eyes = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        const el = eyes.current
+        if (!el) return
+        const irises = el.querySelectorAll<HTMLElement>('[data-iris]')
+        const onMove = (e: PointerEvent) => {
+            irises.forEach((iris) => {
+                const r = iris.parentElement!.getBoundingClientRect()
+                const dx = e.clientX - (r.left + r.width / 2)
+                const dy = e.clientY - (r.top + r.height / 2)
+                const d = Math.min(7, Math.hypot(dx, dy) / 40)
+                const a = Math.atan2(dy, dx)
+                iris.style.transform = `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px)`
+            })
+        }
+        window.addEventListener('pointermove', onMove, { passive: true })
+        return () => window.removeEventListener('pointermove', onMove)
+    }, [])
+    return (
+        <div ref={eyes} className="inline-flex gap-1.5" title="Emperor Eye" aria-hidden>
+            {['#dc2626', '#f59e0b'].map((c) => (
+                <div key={c} className="relative w-8 h-5 rounded-[50%] bg-zinc-100 overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+                    <div
+                        data-iris
+                        className="absolute left-1/2 top-1/2 w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full transition-transform duration-75"
+                        style={{ background: `radial-gradient(circle, #000 32%, ${c} 36%, ${c} 80%, #000 84%)` }}
+                    />
+                </div>
+            ))}
+        </div>
+    )
+}
 
 const skillCount = resume.skills.reduce((n, g) => n + g.items.length, 0)
 
@@ -33,6 +69,7 @@ export default function About() {
                         viewport={{ once: true }}
                     >
                         <div className="inline-flex items-center gap-3 px-4 py-2 mb-4 rounded-full bg-orange-500/10 border border-orange-500/20 backdrop-blur-xl">
+                            <EmperorEye />
                             <span className="text-sm font-bold tracking-[0.2em] uppercase text-orange-500">Seirin · Phantom Sixth Man</span>
                         </div>
                         <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 drop-shadow-lg">

@@ -15,6 +15,13 @@ interface BugItem {
 
 const GAME_SECONDS = 30
 // Naruto: every 4 bugs releases one more tail. Nine tails is Kurama mode: faster spawns, orange screen.
+// Nine tail paths fanning over the score counter, drawn in as tails are released.
+const TAIL_PATHS = Array.from({ length: 9 }, (_, i) => {
+    const a = ((-170 + i * 20) * Math.PI) / 180
+    const ex = 50 + Math.cos(a) * 46, ey = 58 + Math.sin(a) * 46
+    const cx = 50 + Math.cos(a + 0.55) * 28, cy = 58 + Math.sin(a + 0.55) * 28
+    return `M 50 58 Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`
+})
 const BEASTS = ['Shukaku', 'Matatabi', 'Isobu', 'Son Gokū', 'Kokuō', 'Saiken', 'Chōmei', 'Gyūki', 'Kurama']
 const BEST_KEY = 'bugsmasher-best'
 
@@ -87,9 +94,25 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
         >
             {/* HUD */}
             <div className="absolute top-6 left-0 right-0 flex justify-between items-start px-6 sm:px-12 pointer-events-none">
-                <div className="flex flex-col">
-                    <span className="text-xs text-white/50 uppercase tracking-widest">Bugs fixed</span>
-                    <span className="text-4xl font-black text-orange-500 tabular-nums">{score}</span>
+                <div className="relative flex flex-col">
+                    <svg viewBox="0 0 100 60" className="absolute -top-10 -left-8 w-36 h-24 pointer-events-none" aria-hidden>
+                        {TAIL_PATHS.map((d, i) => (
+                            <motion.path
+                                key={d}
+                                d={d}
+                                fill="none"
+                                stroke={kurama ? '#fde047' : '#fb923c'}
+                                strokeWidth={5}
+                                strokeLinecap="round"
+                                initial={false}
+                                animate={{ pathLength: i < tails ? 1 : 0, opacity: i < tails ? 0.9 : 0 }}
+                                transition={{ duration: 0.45, ease: 'easeOut' }}
+                                style={{ filter: 'drop-shadow(0 0 4px rgba(251,146,60,0.8))' }}
+                            />
+                        ))}
+                    </svg>
+                    <span className="relative text-xs text-white/50 uppercase tracking-widest">Bugs fixed</span>
+                    <span className="relative text-4xl font-black text-orange-500 tabular-nums">{score}</span>
                     {best > 0 && <span className="text-xs text-white/40 font-mono">best {best}</span>}
                     {tails > 0 && (
                         <span className={`text-xs font-mono mt-1 ${kurama ? 'text-orange-300 animate-pulse font-bold' : 'text-orange-300/80'}`}>

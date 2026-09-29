@@ -43,7 +43,10 @@ export default function Projects() {
                             transition={{ delay: i * 0.1 }}
                             className="group relative p-6 rounded-xl bg-black/40 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-900/10 transition-all duration-300 backdrop-blur-md overflow-hidden flex flex-col"
                         >
-                            {/* System Window Effect */}
+                            {/* System Window Effect: top bar + corner brackets */}
+                            {['top-1 left-1 border-t-2 border-l-2', 'top-1 right-1 border-t-2 border-r-2', 'bottom-1 left-1 border-b-2 border-l-2', 'bottom-1 right-1 border-b-2 border-r-2'].map((c) => (
+                                <span key={c} aria-hidden className={`absolute w-3 h-3 border-blue-400/80 ${c}`} />
+                            ))}
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 opacity-50" />
 
                             <div className="flex justify-between items-start mb-1">
