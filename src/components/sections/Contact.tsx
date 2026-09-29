@@ -20,6 +20,7 @@ const particles = Array.from({ length: 20 }).map(() => ({
 
 const socials = [
     { name: 'GitHub', href: resume.links.github },
+    { name: 'LinkedIn', href: resume.links.linkedin },
     { name: 'Play Store', href: resume.projects[0].url },
     { name: 'Résumé', href: `${base}/${resume.resumeFile}` },
 ]

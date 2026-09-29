@@ -6,7 +6,8 @@
     "email": "manikarthik@live.com",
     "resumeFile": "Mani_Karthik_Resume.docx",
     "links": {
-        "github": "https://github.com/karthik07m"
+        "github": "https://github.com/karthik07m",
+        "linkedin": "https://www.linkedin.com/in/mani-karthik-bollimuntha-b30268b7/"
     },
     "about": [
         "I build enterprise Appian applications: process models, SAIL interfaces, records, CDTs, and REST/SOAP integrations, backed by MySQL and SQL Server work that I tune myself.",
