@@ -51,7 +51,7 @@ export default function Projects() {
                                     {project.name}
                                 </h3>
                                 <span className="text-[10px] font-mono text-blue-300 bg-blue-900/30 px-2 py-1 rounded border border-blue-500/30">
-                                    RANK S · {project.year}
+                                    RANK S{project.year && ` · ${project.year}`}
                                 </span>
                             </div>
                             <p className="text-xs font-mono text-blue-300/60 mb-4">{project.kind}</p>

@@ -169,6 +169,22 @@
             "description": "Practice site for Appian interview questions. Built with AI assistance to move fast; Cloudflare in front for the domain and security.",
             "url": "https://appianverse.com",
             "linkLabel": "appianverse.com"
+        },
+        {
+            "name": "Coinly",
+            "kind": "Android app, personal finance",
+            "year": "",
+            "description": "A private expense and budget tracker. Log income, expenses and transfers across accounts, set monthly category budgets, and read clear reports. Data stays on the device, no account required.",
+            "url": "https://play.google.com/store/apps/details?id=com.budget.coinly",
+            "linkLabel": "Google Play"
+        },
+        {
+            "name": "Dotkin",
+            "kind": "Desktop app, Electron, macOS / Windows / Linux",
+            "year": "2026",
+            "description": "A free, MIT-licensed focus tracker: timed 10 to 45 minute blocks, a morning planner, a floating desktop companion called DOT, and optional Claude coaching that reads your own log. Everything lives in one plain file on your machine.",
+            "url": "https://karthik07m.github.io/dotkin/",
+            "linkLabel": "karthik07m.github.io/dotkin"
         }
     ],
     "education": [
