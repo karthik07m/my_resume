@@ -19,10 +19,10 @@ const particles = Array.from({ length: 20 }).map(() => ({
 }))
 
 const socials = [
-    { name: 'GitHub', href: resume.links.github },
-    { name: 'LinkedIn', href: resume.links.linkedin },
-    { name: 'Play Store', href: resume.projects[0].url },
-    { name: 'Résumé', href: `${base}/${resume.resumeFile}` },
+    { name: 'GitHub', href: resume.links.github, breath: 'Flame Breathing' },
+    { name: 'LinkedIn', href: resume.links.linkedin, breath: 'Water Breathing' },
+    { name: 'Play Store', href: resume.projects[0].url, breath: 'Wind Breathing' },
+    { name: 'Résumé', href: `${base}/${resume.resumeFile}`, breath: 'Sun Breathing' },
 ]
 
 export default function Contact() {
@@ -43,7 +43,7 @@ export default function Contact() {
                         <h2 className="relative text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white mb-2">
                             BREATH OF <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">CODE</span>
                         </h2>
-                        <p className="text-base sm:text-xl text-white/60 font-mono tracking-widest uppercase">First Form: Contact</p>
+                        <p className="text-base sm:text-xl text-white/60 font-mono tracking-widest uppercase">Total Concentration Breathing · First Form: Contact</p>
                     </div>
 
                     <p className="text-lg md:text-2xl text-white/80 max-w-2xl mx-auto leading-relaxed">
@@ -73,9 +73,10 @@ export default function Contact() {
                                     href={social.href}
                                     target={social.href.startsWith('http') ? '_blank' : undefined}
                                     rel="noopener noreferrer"
-                                    className="hover:text-pink-400 transition-colors uppercase text-sm tracking-widest font-bold"
+                                    className="group flex flex-col items-center gap-1 hover:text-pink-400 transition-colors uppercase text-sm tracking-widest font-bold"
                                 >
                                     {social.name}
+                                    <span className="text-[9px] tracking-wider text-white/30 group-hover:text-pink-300/70 transition-colors">{social.breath}</span>
                                 </a>
                             ))}
                         </div>

@@ -14,6 +14,8 @@ interface BugItem {
 }
 
 const GAME_SECONDS = 30
+// Naruto: every 4 bugs releases one more tail. Nine tails is Kurama mode: faster spawns, orange screen.
+const BEASTS = ['Shukaku', 'Matatabi', 'Isobu', 'Son Gokū', 'Kokuō', 'Saiken', 'Chōmei', 'Gyūki', 'Kurama']
 const BEST_KEY = 'bugsmasher-best'
 
 const readBest = () => {
@@ -27,11 +29,13 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
     const [storedBest, setStoredBest] = useState(readBest) // safe: this component only mounts client-side
     const best = Math.max(storedBest, score)
     const gameOver = timeLeft <= 0
+    const tails = Math.min(9, Math.floor(score / 4))
+    const kurama = tails === 9
 
     // Spawn bugs faster as time runs out
     useEffect(() => {
         if (gameOver) return
-        const every = timeLeft > 15 ? 800 : 500
+        const every = kurama ? 350 : timeLeft > 15 ? 800 : 500
         const spawn = setInterval(() => {
             setBugs((prev) => [...prev, {
                 id: Date.now(),
@@ -43,7 +47,7 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
             }])
         }, every)
         return () => clearInterval(spawn)
-    }, [gameOver, timeLeft])
+    }, [gameOver, timeLeft, kurama])
 
     // Countdown
     useEffect(() => {
@@ -77,7 +81,7 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm overflow-hidden select-none touch-none"
+            className={`fixed inset-0 z-[100] ${kurama ? 'bg-orange-950/90' : 'bg-black/90'} backdrop-blur-sm overflow-hidden select-none touch-none transition-colors duration-700`}
             role="dialog"
             aria-label="Bug Smasher mini game"
         >
@@ -87,6 +91,11 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
                     <span className="text-xs text-white/50 uppercase tracking-widest">Bugs fixed</span>
                     <span className="text-4xl font-black text-orange-500 tabular-nums">{score}</span>
                     {best > 0 && <span className="text-xs text-white/40 font-mono">best {best}</span>}
+                    {tails > 0 && (
+                        <span className={`text-xs font-mono mt-1 ${kurama ? 'text-orange-300 animate-pulse font-bold' : 'text-orange-300/80'}`}>
+                            {'🦊'} {tails}-Tails · {BEASTS[tails - 1]}{kurama && ' · KURAMA MODE'}
+                        </span>
+                    )}
                 </div>
                 <div className="flex flex-col items-center">
                     <span className="text-xs text-white/50 uppercase tracking-widest">Time</span>
@@ -140,8 +149,11 @@ export default function BugSmasher({ onClose }: { onClose: () => void }) {
                     <p className="text-xl sm:text-2xl text-white/70 mb-2">
                         Bugs fixed: <span className="text-orange-500 font-bold">{score}</span>
                     </p>
-                    <p className="text-sm text-white/40 font-mono mb-8">
+                    <p className="text-sm text-white/40 font-mono mb-2">
                         {score > storedBest && score > 0 ? 'New personal best!' : `Personal best: ${best}`}
+                    </p>
+                    <p className="text-sm text-orange-300/80 font-mono mb-8">
+                        {tails ? `Tailed beast released: ${BEASTS[tails - 1]} (${tails}-Tails)` : 'No tails released. Kurama is unimpressed.'}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
                         <button

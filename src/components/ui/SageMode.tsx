@@ -23,6 +23,7 @@ export const sage = {
 
 export default function SageMode() {
     const [banner, setBanner] = useState<string | null>(null)
+    const [active, setActive] = useState(false)
 
     useEffect(() => {
         let keys: string[] = []
@@ -35,7 +36,7 @@ export default function SageMode() {
                 sage.toggle()
             }
         }
-        const onChange = () => setBanner(on ? 'SAGE MODE ACTIVATED' : 'SAGE MODE RELEASED')
+        const onChange = () => { setActive(on); setBanner(on ? 'SAGE MODE ACTIVATED' : 'SAGE MODE RELEASED') }
         window.addEventListener('keydown', onKey)
         subs.add(onChange)
         return () => {
@@ -51,6 +52,17 @@ export default function SageMode() {
     }, [banner])
 
     return (
+        <>
+        <button
+            type="button"
+            onClick={() => sage.toggle()}
+            aria-pressed={active}
+            aria-label={active ? 'Release Sage Mode' : 'Enter Sage Mode'}
+            title={active ? 'Release Sage Mode' : 'Sage Mode (or: Konami code, type "sage", tap the hero badge 3x)'}
+            className={`fixed bottom-4 left-[3.75rem] z-[60] w-9 h-9 rounded-full bg-black/70 backdrop-blur border text-base leading-none transition-colors ${active ? 'border-orange-400 shadow-[0_0_14px_rgba(251,146,60,0.8)] bg-orange-500/20' : 'border-orange-500/30 hover:bg-orange-500/10'}`}
+        >
+            🐸
+        </button>
         <AnimatePresence>
             {banner && (
                 <motion.div
@@ -72,5 +84,6 @@ export default function SageMode() {
                 </motion.div>
             )}
         </AnimatePresence>
+        </>
     )
 }
