@@ -73,7 +73,7 @@ export default function Contact() {
     }
 
     return (
-        <section className="relative md:min-h-screen w-full flex items-center py-16 md:py-24 bg-transparent overflow-hidden">
+        <section className="relative md:min-h-screen w-full flex flex-col justify-center pt-16 pb-24 md:py-24 bg-transparent overflow-hidden">
             <Waves />
 
             <div className="relative z-20 w-full max-w-[1100px] mx-auto px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center">
@@ -207,7 +207,7 @@ export default function Contact() {
                 </ul>
             </div>
 
-            <p className="absolute bottom-4 inset-x-0 z-20 text-center text-xs text-white/30 font-mono">© {new Date().getFullYear()} {resume.name}</p>
+            <p className="relative z-20 mt-14 text-center text-xs text-white/30 font-mono">© {new Date().getFullYear()} {resume.name}</p>
 
             <AnimatePresence>
                 {playing && <BugSmasher onClose={() => setPlaying(false)} />}

@@ -150,7 +150,7 @@ export default function Hero() {
                                 transition={{ delay: 0.8 + i * 0.06, type: 'spring', stiffness: 220, damping: 24 }}
                                 className="flex flex-col gap-1 items-start"
                             >
-                                <div className="text-[10px] text-white/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] whitespace-nowrap">{stat.label}</div>
+                                <div className="text-[10px] text-white/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] leading-tight sm:whitespace-nowrap">{stat.label}</div>
                                 <div className="text-xl sm:text-2xl md:text-3xl font-black tabular-nums text-green-500">{stat.val}</div>
                             </motion.div>
                         ))}
