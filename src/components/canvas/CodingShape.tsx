@@ -7,7 +7,8 @@ import * as THREE from "three";
 import { FontLoader, TextGeometry, MeshSurfaceSampler } from "three-stdlib";
 import type { Font } from "three-stdlib";
 
-export const FORMS = ["Appian", "Shuriken", "Mangekyō", "Santōryū", "MK"] as const;
+// Mangekyō first: the Sharingan is the first thing the page shows.
+export const FORMS = ["Mangekyō", "Shuriken", "Santōryū", "Appian", "MK"] as const;
 const COUNT = 6000;
 const FONT_URL = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/fonts/helvetiker_bold.typeface.json`;
 
@@ -64,7 +65,7 @@ const buildForms = (font: Font) => {
         santoryu.set([sx * Math.cos(sa) - sy * Math.sin(sa), sx * Math.sin(sa) + sy * Math.cos(sa), (rand() - 0.5) * 0.1], i * 3);
     }
 
-    return [fromText(font, "Appian", 0.9), shuriken, mangekyo, santoryu, fromText(font, "MK", 1.6)];
+    return [mangekyo, shuriken, santoryu, fromText(font, "Appian", 0.9), fromText(font, "MK", 1.6)];
 };
 
 interface Props {
@@ -121,7 +122,7 @@ export function CodingShape({ form, onTap }: Props) {
                 <bufferGeometry>
                     <bufferAttribute attach="attributes-position" args={[buffer, 3]} />
                 </bufferGeometry>
-                <pointsMaterial size={0.04} color="#34d399" sizeAttenuation transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+                <pointsMaterial size={0.04} color={FORMS[form] === "Mangekyō" ? "#ef4444" : "#34d399"} sizeAttenuation transparent opacity={0.8} blending={THREE.AdditiveBlending} />
             </points>
         </>
     );

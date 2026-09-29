@@ -23,19 +23,19 @@ const appianYears = Math.floor((Date.now() - new Date('2018-11-01').getTime()) /
 const clientCount = new Set(resume.experience.map((j) => j.client).filter(Boolean)).size
 
 const STATS = [
+    { label: 'Appian yrs', val: `${appianYears}` },
+    { label: 'Clients', val: `${clientCount}` },
+    { label: 'Appian ver.', val: '18→26' },
+    { label: 'Bugs slain', val: '9000+' },
     { label: 'Chakra', val: '∞' },
     { label: '8 Gates', val: 'OPEN' },
     { label: 'Body Flicker', val: 'S+' },
     { label: 'Ramen', val: '100%' },
-    { label: 'Appian yrs', val: `${appianYears}` },
-    { label: 'Clients', val: `${clientCount}` },
-    { label: 'Bugs slain', val: '9000+' },
-    { label: 'Appian ver.', val: '18→26' },
 ]
 
 export default function Hero() {
     const [typedText, setTypedText] = useState('')
-    const fullText = `${resume.title} | Appian Level 2 Certified`
+    const fullText = resume.tagline
     const [showCursor, setShowCursor] = useState(true)
     const [form, setForm] = useState(0)
     const [taps, setTaps] = useState(0)
@@ -46,8 +46,7 @@ export default function Hero() {
         badgeTaps.current += 1
         if (badgeTaps.current >= 3) { badgeTaps.current = 0; sage.toggle() }
     }
-    // Mangekyō form: the Sharingan tints the whole page red while it is up (see globals.css).
-    useEffect(() => { document.documentElement.toggleAttribute('data-mangekyo', FORMS[form] === 'Mangekyō') }, [form])
+    const sharingan = FORMS[form] === 'Mangekyō'
     // Phones skip the two 2D particle canvases: the 3D hero + star field is enough work for a mobile GPU.
     const isDesktop = useMediaQuery('(min-width: 768px)')
 
@@ -65,7 +64,7 @@ export default function Hero() {
             } else {
                 clearInterval(timer)
             }
-        }, 50)
+        }, 28)
         const cursorTimer = setInterval(() => setShowCursor((prev) => !prev), 500)
         return () => {
             clearInterval(timer)
@@ -130,7 +129,7 @@ export default function Hero() {
 
                     {/* Role / Typing */}
                     <div className="min-h-8 flex items-center justify-start">
-                        <p className="text-sm sm:text-lg md:text-2xl font-light tracking-wider sm:tracking-widest text-white/70 uppercase">
+                        <p className="text-sm sm:text-base md:text-lg font-light text-white/70 max-w-xl leading-relaxed">
                             {typedText}
                             <span className={clsx("inline-block w-2 h-4 sm:h-6 ml-2 align-middle bg-green-500", showCursor ? 'opacity-100' : 'opacity-0')} />
                         </p>
@@ -174,8 +173,11 @@ export default function Hero() {
                     </div>
                 </div>
 
-                {/* Right Column: 3D Object (click it: Appian -> Shuriken -> Mangekyō -> Santōryū -> MK) */}
+                {/* Right Column: 3D Object (click it: Mangekyō -> Shuriken -> Santōryū -> Appian -> MK) */}
                 <div className="relative w-full h-[240px] sm:h-[400px] lg:h-[800px] flex items-center justify-center order-1 lg:order-2 pointer-events-auto z-30">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
+                        <div className={clsx('w-48 h-48 sm:w-72 sm:h-72 lg:w-[440px] lg:h-[440px] rounded-full blur-3xl transition-colors duration-700', sharingan ? 'bg-red-600/30' : 'bg-emerald-500/15')} />
+                    </div>
                     <Canvas camera={{ position: [0, 0, 6] }} dpr={[1, 1.5]}>
                         <ambientLight intensity={0.5} />
                         <directionalLight position={[10, 10, 5]} intensity={1} />
@@ -188,12 +190,12 @@ export default function Hero() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 2 }}
-                        className="absolute bottom-2 lg:bottom-24 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/50 border border-green-500/30 backdrop-blur font-mono text-[11px] tracking-widest uppercase text-green-400 hover:bg-green-500/10 transition-colors whitespace-nowrap"
+                        className={clsx('absolute bottom-2 lg:bottom-24 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/50 border backdrop-blur font-mono text-[11px] tracking-widest uppercase transition-colors whitespace-nowrap', sharingan ? 'border-red-500/40 text-red-400 hover:bg-red-500/10' : 'border-green-500/30 text-green-400 hover:bg-green-500/10')}
                     >
                         {taps === 0 ? (
-                            <span className="animate-pulse">Tap to transform</span>
+                            <span className="animate-pulse">Mangekyō Sharingan · tap to transform</span>
                         ) : (
-                            <>{FORMS[form]}{FORMS[form] === 'Mangekyō' && ' · Sharingan active'} · {form + 1}/{FORMS.length}{taps >= FORMS.length && ' · all forms unlocked ✦'}</>
+                            <>{FORMS[form]}{sharingan && ' Sharingan'} · {form + 1}/{FORMS.length}{taps >= FORMS.length && ' · all forms unlocked ✦'}</>
                         )}
                     </motion.button>
                 </div>

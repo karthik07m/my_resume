@@ -76,11 +76,6 @@ body {
   background: var(--neon-blue);
 }
 
-/* Mangekyō form in the hero (see sections/Hero.tsx): the Sharingan tints the world red. Sage Mode below wins if both are on. */
-html[data-mangekyo] .sage-shift {
-  filter: hue-rotate(-140deg) saturate(1.3);
-}
-
 /* Sage Mode (Konami code / type "sage" / tap the hero badge 3x): shift the whole palette to orange and gold. */
 html[data-sage] .sage-shift {
   filter: hue-rotate(-120deg) saturate(1.25);
