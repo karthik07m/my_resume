@@ -51,7 +51,7 @@ export default function Projects() {
                                     {project.name}
                                 </h3>
                                 <span className="text-[10px] font-mono text-blue-300 bg-blue-900/30 px-2 py-1 rounded border border-blue-500/30">
-                                    RANK S{project.year && ` · ${project.year}`}
+                                    HUNTER RANK S{project.year && ` · ${project.year}`}
                                 </span>
                             </div>
                             <p className="text-xs font-mono text-blue-300/60 mb-4">{project.kind}</p>
@@ -60,7 +60,7 @@ export default function Projects() {
 
                             <div className="flex items-center justify-between mt-auto">
                                 <span className="text-[10px] font-bold px-2 py-1 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20 uppercase tracking-widest">
-                                    Cleared
+                                    Dungeon Cleared
                                 </span>
                                 <span className="text-sm text-blue-400 group-hover:underline">{project.linkLabel} ↗</span>
                             </div>

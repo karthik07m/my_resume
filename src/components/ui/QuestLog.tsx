@@ -32,10 +32,10 @@ export default function QuestLog() {
                         const next = [...prev, id]
                         const quest = QUESTS.find((q) => q.id === id)
                         const toast: Toast[] = quest && id !== 'hero'
-                            ? [{ id: Date.now(), kicker: `Quest unlocked · LV ${next.length}`, text: quest.name }]
+                            ? [{ id: Date.now(), kicker: `[SYSTEM] Quest unlocked · LV ${next.length}`, text: quest.name }]
                             : []
                         if (next.length === QUESTS.length) {
-                            toast.push({ id: Date.now() + 1, kicker: 'Achievement', text: 'Read the whole scroll 🏆' })
+                            toast.push({ id: Date.now() + 1, kicker: '[SYSTEM] Achievement', text: 'Phantom Sixth Man: you saw everything 🏆' })
                         }
                         if (toast.length) { setToasts((t) => [...t, ...toast]); sfx.levelUp() }
                         return next
@@ -72,7 +72,7 @@ export default function QuestLog() {
 
             {/* Level badge */}
             <div className="fixed bottom-4 right-4 z-[60] px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-green-500/30 font-mono text-[11px] text-green-400 tracking-widest pointer-events-none">
-                LV {unlocked.length}/{QUESTS.length}
+                PLAYER LV {unlocked.length}/{QUESTS.length}
             </div>
 
             {/* Toasts */}

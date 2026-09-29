@@ -9,7 +9,7 @@ const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'ar
 let on = false
 const subs = new Set<() => void>()
 
-// Sage Mode: a site-wide palette shift + faster sphere. Toggled by the Konami code, typing "sage",
+// Sage Mode: a site-wide palette shift + faster hero shape. Toggled by the Konami code, typing "sage",
 // or tapping the hero badge three times (mobile).
 export const sage = {
     isOn: () => on,

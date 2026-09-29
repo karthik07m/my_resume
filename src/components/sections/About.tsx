@@ -7,8 +7,8 @@ import { motion } from 'framer-motion'
 // Anime names for the skill groups in resume.json, in order.
 const groupTheme = [
     { name: 'The Heavy Artillery', icon: '📜' },
-    { name: 'Data Vaults', icon: '🔒' },
-    { name: 'Code Combat', icon: '👊' },
+    { name: 'Emperor Eye', icon: '👁️' },
+    { name: 'The Zone', icon: '🏀' },
     { name: 'Sage Mode', icon: '☁️' },
 ]
 
@@ -32,6 +32,9 @@ export default function About() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
+                        <div className="inline-flex items-center gap-3 px-4 py-2 mb-4 rounded-full bg-orange-500/10 border border-orange-500/20 backdrop-blur-xl">
+                            <span className="text-sm font-bold tracking-[0.2em] uppercase text-orange-500">Seirin · Phantom Sixth Man</span>
+                        </div>
                         <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 drop-shadow-lg">
                             THE CODE I LIVE BY
                         </h2>

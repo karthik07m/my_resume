@@ -24,8 +24,8 @@ const clientCount = new Set(resume.experience.map((j) => j.client).filter(Boolea
 
 const STATS = [
     { label: 'Chakra', val: '∞' },
-    { label: 'Willpower', val: 'MAX' },
-    { label: 'Speed', val: 'S+' },
+    { label: '8 Gates', val: 'OPEN' },
+    { label: 'Body Flicker', val: 'S+' },
     { label: 'Ramen', val: '100%' },
     { label: 'Appian yrs', val: `${appianYears}` },
     { label: 'Clients', val: `${clientCount}` },
@@ -46,6 +46,8 @@ export default function Hero() {
         badgeTaps.current += 1
         if (badgeTaps.current >= 3) { badgeTaps.current = 0; sage.toggle() }
     }
+    // Mangekyō form: the Sharingan tints the whole page red while it is up (see globals.css).
+    useEffect(() => { document.documentElement.toggleAttribute('data-mangekyo', FORMS[form] === 'Mangekyō') }, [form])
     // Phones skip the two 2D particle canvases: the 3D hero + star field is enough work for a mobile GPU.
     const isDesktop = useMediaQuery('(min-width: 768px)')
 
@@ -81,7 +83,7 @@ export default function Hero() {
                 {/* Left Column: Text Content */}
                 <div className="flex flex-col items-start space-y-5 lg:space-y-8 pointer-events-auto text-left order-2 lg:order-1 w-full">
 
-                    <VaporText texts={["Appian Developer", "Process Automation", "BPM Expert", "Code Wizard"]} className="w-full" />
+                    <VaporText texts={["Appian Developer", "Santōryū Engineer", "Sharingan Code Reader", "Process Automation", "Body Flicker Deploys", "BPM Expert", "Code Wizard"]} className="w-full" />
 
                     {/* Identity Block */}
                     <div className="space-y-4 flex flex-col items-start">
@@ -146,7 +148,7 @@ export default function Hero() {
                     </div>
                 </div>
 
-                {/* Right Column: 3D Object (click it: sphere -> cube -> Appian) */}
+                {/* Right Column: 3D Object (click it: Appian -> Shuriken -> Mangekyō -> Santōryū -> MK) */}
                 <div className="relative w-full h-[240px] sm:h-[400px] lg:h-[800px] flex items-center justify-center order-1 lg:order-2 pointer-events-auto z-30">
                     <Canvas camera={{ position: [0, 0, 6] }} dpr={[1, 1.5]}>
                         <ambientLight intensity={0.5} />
@@ -165,7 +167,7 @@ export default function Hero() {
                         {taps === 0 ? (
                             <span className="animate-pulse">Tap to transform</span>
                         ) : (
-                            <>{FORMS[form]} · {form + 1}/{FORMS.length}{taps >= FORMS.length && ' · all forms unlocked ✦'}</>
+                            <>{FORMS[form]}{FORMS[form] === 'Mangekyō' && ' · Sharingan active'} · {form + 1}/{FORMS.length}{taps >= FORMS.length && ' · all forms unlocked ✦'}</>
                         )}
                     </motion.button>
                 </div>
@@ -179,7 +181,7 @@ export default function Hero() {
                 className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-4 pointer-events-auto cursor-pointer z-30 mix-blend-difference"
                 onClick={() => scrollToSection('about')}
             >
-                <span className="text-[10px] uppercase tracking-[0.3em] text-white/50">Scroll</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-white/50">Scroll · not that way, Zoro</span>
                 <div className="w-[1px] h-12 bg-white/20 overflow-hidden">
                     <motion.div
                         className="w-full h-full bg-white"

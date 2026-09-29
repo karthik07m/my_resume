@@ -12,6 +12,7 @@ import Navigation from '@/components/ui/Navigation'
 import QuestLog from '@/components/ui/QuestLog'
 import Loader from '@/components/ui/Loader'
 import SageMode from '@/components/ui/SageMode'
+import Haki from '@/components/ui/Haki'
 import SoundToggle from '@/components/ui/SoundToggle'
 import CursorTrail from '@/components/effects/CursorTrail'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -33,10 +34,11 @@ export default function Home() {
         <Navigation />
         <QuestLog />
         <SageMode />
+        <Haki />
         <SoundToggle />
         {hasMouse && <CursorTrail />}
 
-        <div className="relative z-10 sage-shift">
+        <div className="relative z-10 sage-shift haki-shake">
           <div id="hero"><Hero /></div>
           <div id="about"><About /></div>
           <div id="experience"><Experience /></div>

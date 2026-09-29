@@ -56,6 +56,10 @@ export const sfx = {
         tone(110, 0.6, { type: 'sawtooth', to: 440, gain: 0.07 })
         tone(220, 0.6, { type: 'square', to: 880, gain: 0.04, delay: 0.1 })
     },
+    haki: () => {
+        tone(70, 1.2, { type: 'sawtooth', to: 30, gain: 0.1 })
+        tone(140, 0.8, { type: 'square', to: 50, gain: 0.05, delay: 0.05 })
+    },
     toggle() {
         enabled = !isOn()
         try { localStorage.setItem(KEY, enabled ? '1' : '0') } catch { /* private mode */ }
