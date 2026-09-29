@@ -173,9 +173,9 @@
         },
         {
             "name": "Coinly",
-            "kind": "Android app, personal finance",
+            "kind": "Android app, Flutter",
             "year": "2026",
-            "description": "A private expense and budget tracker. Log income, expenses and transfers across accounts, set monthly category budgets, and read clear reports. Data stays on the device, no account required.",
+            "description": "A private Flutter expense and budget tracker. Log income, expenses and transfers across accounts, set monthly category budgets, and read clear reports. Data stays on the device, no account required.",
             "url": "https://play.google.com/store/apps/details?id=com.budget.coinly",
             "linkLabel": "Google Play"
         },
