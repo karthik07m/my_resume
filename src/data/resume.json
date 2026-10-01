@@ -78,8 +78,7 @@
             "boss": {
                 "name": "The Federal Compliance Hydra",
                 "difficulty": 5
-            },
-            "bounty": "3,000,000,000"
+            }
         },
         {
             "company": "Yexle Limited",
@@ -99,8 +98,7 @@
             "boss": {
                 "name": "HSBC Loan Onboarding",
                 "difficulty": 4
-            },
-            "bounty": "500,000,000"
+            }
         },
         {
             "company": "Hexaware Technologies",
@@ -120,8 +118,7 @@
             "boss": {
                 "name": "IQVIA Scheduling Labyrinth",
                 "difficulty": 4
-            },
-            "bounty": "300,000,000"
+            }
         },
         {
             "company": "Hebeon Technologies",
@@ -138,8 +135,7 @@
             "boss": {
                 "name": "The Java Grind",
                 "difficulty": 2
-            },
-            "bounty": "30,000,000"
+            }
         },
         {
             "company": "Web Synergies",
@@ -155,8 +151,7 @@
             "boss": {
                 "name": "Tutorial: Cordova Cave",
                 "difficulty": 1
-            },
-            "bounty": "1,000,000"
+            }
         }
     ],
     "projects": [
