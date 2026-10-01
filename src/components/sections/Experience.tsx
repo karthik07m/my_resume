@@ -27,110 +27,185 @@ function Katana({ hilt }: { hilt: string }) {
 }
 
 // One island per job, newest first to match resume.experience: the career sailed from East Blue to Wano.
-// moment: the scene everyone remembers from that arc. tie: what it stands for in this job.
-type Arc = { id: string; name: string; saga: string; moment: string; tie: string; sky: [string, string]; sun: string; scene: React.ReactNode }
-const ARCS: Arc[] = [
-    {
-        id: 'wano', name: 'Wano Country', saga: 'Final Saga · Onigashima raid',
-        moment: 'Gear 5: the Drums of Liberation', tie: 'Peak form. Leading the raid on the Compliance Hydra.', sky: ['#7f1d1d', '#f59e0b'], sun: '#fde68a',
-        scene: (
-            <g>
-                <path d="M10 74 L 60 36 L 110 74 Z" fill="#450a0a" opacity="0.7" />
-                <path d="M70 74 L 120 44 L 160 74 Z" fill="#450a0a" opacity="0.5" />
-                <g fill="#dc2626">
-                    <rect x="54" y="36" width="6" height="38" />
-                    <rect x="100" y="36" width="6" height="38" />
-                    <rect x="46" y="31" width="68" height="6" rx="1" />
-                    <rect x="52" y="44" width="56" height="4" />
-                </g>
-            </g>
-        ),
-    },
-    {
-        id: 'marineford', name: 'Marineford', saga: 'Summit War · Marine HQ',
-        moment: '“The One Piece… is real!”', tie: 'One demo in front of HSBC that changed everything.', sky: ['#0f172a', '#475569'], sun: '#e2e8f0',
-        scene: (
-            <g>
+// Every island has a mechanic only it has, triggered when the ship (Log Pose) is nearest.
+type SceneProps = { active: boolean }
+type Arc = { id: string; name: string; saga: string; moment: string; tie: string; accent: string; Scene: (p: SceneProps) => React.ReactElement }
+
+const makeRand = (seed: number) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)
+
+function Sky({ id, from, to }: { id: string; from: string; to: string }) {
+    return (
+        <>
+            <defs>
+                <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stopColor={from} />
+                    <stop offset="1" stopColor={to} />
+                </linearGradient>
+            </defs>
+            <rect width="160" height="90" fill={`url(#${id})`} />
+        </>
+    )
+}
+function Sea({ fast }: { fast: boolean }) {
+    return (
+        <motion.path
+            d="M-40 76 Q -20 70 0 76 T 40 76 T 80 76 T 120 76 T 160 76 T 200 76 V 90 H -40 Z"
+            fill="#082f49"
+            opacity={0.95}
+            animate={{ x: [0, -40] }}
+            transition={{ duration: fast ? 1.6 : 3.2, repeat: Infinity, ease: 'linear' }}
+        />
+    )
+}
+
+// Wano: Gear 5. The world goes white and the torii beats to the Drums of Liberation.
+function WanoScene({ active }: SceneProps) {
+    const ink = active ? '#111111' : '#dc2626'
+    return (
+        <>
+            <Sky id="sky-wano" from="#7f1d1d" to="#f59e0b" />
+            <motion.rect width="160" height="90" fill="#fafafa" initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ duration: 0.5 }} />
+            <motion.circle cx="128" cy="24" r="10" initial={false} animate={{ fill: active ? '#111111' : '#fde68a' }} />
+            <motion.path d="M10 74 L 60 36 L 110 74 Z" opacity="0.8" initial={false} animate={{ fill: active ? '#e5e5e5' : '#450a0a' }} />
+            <motion.path d="M70 74 L 120 44 L 160 74 Z" opacity="0.6" initial={false} animate={{ fill: active ? '#d4d4d4' : '#450a0a' }} />
+            <motion.g
+                style={{ originX: '80px', originY: '56px' }}
+                animate={active ? { scale: [1, 1.1, 1, 1.1, 1, 1] } : { scale: 1 }}
+                transition={active ? { duration: 1.3, repeat: Infinity, times: [0, 0.12, 0.24, 0.36, 0.48, 1], ease: 'easeOut' } : { duration: 0.3 }}
+            >
+                <motion.rect x="54" y="36" width="6" height="38" initial={false} animate={{ fill: ink }} />
+                <motion.rect x="100" y="36" width="6" height="38" initial={false} animate={{ fill: ink }} />
+                <motion.rect x="46" y="31" width="68" height="6" rx="1" initial={false} animate={{ fill: ink }} />
+                <motion.rect x="52" y="44" width="56" height="4" initial={false} animate={{ fill: ink }} />
+            </motion.g>
+            <motion.text x="8" y="17" fontSize="9" fontWeight="900" fill="#111111" fontFamily="ui-sans-serif, system-ui" initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ delay: 0.3 }}>
+                GEAR 5
+            </motion.text>
+            <Sea fast={active} />
+        </>
+    )
+}
+
+// Marineford: Whitebeard's quake. The island shakes and cracks when the Log Pose locks on.
+const CRACKS = ['M80 90 L 76 70 L 84 58 L 72 44 L 78 30', 'M30 90 L 40 72 L 34 60 L 46 48', 'M132 90 L 122 74 L 130 62 L 118 50']
+function MarinefordScene({ active }: SceneProps) {
+    return (
+        <>
+            <Sky id="sky-marineford" from="#0f172a" to="#475569" />
+            <circle cx="128" cy="24" r="10" fill="#e2e8f0" />
+            <motion.g animate={active ? { x: [0, -3, 3, -2, 2, 0], y: [0, 1, -1, 1, 0, 0] } : { x: 0, y: 0 }} transition={active ? { duration: 0.5, repeat: Infinity, repeatDelay: 1.4 } : { duration: 0.2 }}>
                 <path d="M26 74 V 46 H 36 V 40 H 44 V 46 H 54 V 40 H 62 V 46 H 74 V 28 H 86 V 46 H 98 V 40 H 106 V 46 H 116 V 40 H 124 V 46 H 134 V 74 Z" fill="#1e293b" />
                 <rect x="78" y="34" width="8" height="40" fill="#0f172a" />
                 <g fill="#fbbf24" opacity="0.8"><rect x="40" y="56" width="4" height="6" /><rect x="60" y="56" width="4" height="6" /><rect x="100" y="56" width="4" height="6" /><rect x="118" y="56" width="4" height="6" /></g>
                 <motion.path d="M80 28 V 14 L 94 18.5 L 80 23 Z" fill="#f8fafc" animate={{ skewY: [0, 4, 0, -4, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }} />
-            </g>
-        ),
-    },
-    {
-        id: 'enies', name: 'Enies Lobby', saga: 'Water 7 Saga · Gates of Justice',
-        moment: '“I want to live!” · the flag goes up in flames', tie: 'Declared war on manual scheduling. Won an award for it.', sky: ['#0c4a6e', '#38bdf8'], sun: '#fef3c7',
-        scene: (
-            <g>
+            </motion.g>
+            <Sea fast={active} />
+            {CRACKS.map((d, i) => (
+                <motion.path key={d} d={d} fill="none" stroke="#f8fafc" strokeWidth="1.5" strokeLinejoin="round" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ duration: 0.6, delay: active ? 0.2 + i * 0.15 : 0, ease: 'easeOut' }} />
+            ))}
+        </>
+    )
+}
+
+// Enies Lobby: the Gates of Justice swing open and the World Government flag burns.
+function EniesScene({ active }: SceneProps) {
+    const gate = { type: 'spring', stiffness: 50, damping: 14 } as const
+    return (
+        <>
+            <Sky id="sky-enies" from="#0c4a6e" to="#38bdf8" />
+            <circle cx="128" cy="24" r="10" fill="#fef3c7" />
+            <motion.rect x="64" y="40" width="32" height="36" fill="#bae6fd" animate={{ opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 1.4, repeat: Infinity }} />
+            <rect x="74" y="34" width="12" height="40" fill="#e2e8f0" />
+            <path d="M72 34 L 80 24 L 88 34 Z" fill="#f8fafc" />
+            <line x1="80" y1="24" x2="80" y2="9" stroke="#e2e8f0" strokeWidth="1" />
+            <motion.path d="M80 9 h 12 v 7 h -12 z" fill="#1e3a8a" initial={false} animate={{ opacity: active ? 0 : 1 }} transition={{ delay: active ? 1.1 : 0, duration: 0.4 }} />
+            <motion.g initial={false} animate={{ opacity: active ? [0, 1, 1, 0.8, 0] : 0 }} transition={active ? { duration: 1.8, times: [0, 0.15, 0.6, 0.85, 1], delay: 0.3 } : { duration: 0.2 }}>
+                <motion.path d="M80 17 Q 84 11 82 5 Q 88 9 91 3 Q 93 11 89 17 Z" fill="#f97316" animate={{ scaleY: [1, 1.15, 0.95, 1] }} transition={{ duration: 0.4, repeat: Infinity }} style={{ originX: '85px', originY: '17px' }} />
+                <path d="M83 16 Q 85 12 85 9 Q 88 12 87 16 Z" fill="#fde047" />
+            </motion.g>
+            <motion.circle cx="87" cy="8" r="3" fill="#94a3b8" initial={false} animate={active ? { opacity: [0, 0.6, 0], y: [0, -12] } : { opacity: 0 }} transition={active ? { delay: 1.6, duration: 1.8, repeat: Infinity } : { duration: 0.2 }} />
+            <motion.g initial={false} animate={{ x: active ? -28 : 0 }} transition={gate}>
                 <rect x="22" y="22" width="44" height="52" rx="2" fill="#0f172a" />
-                <rect x="94" y="22" width="44" height="52" rx="2" fill="#0f172a" />
                 <rect x="26" y="26" width="36" height="44" fill="#1e293b" />
+            </motion.g>
+            <motion.g initial={false} animate={{ x: active ? 28 : 0 }} transition={gate}>
+                <rect x="94" y="22" width="44" height="52" rx="2" fill="#0f172a" />
                 <rect x="98" y="26" width="36" height="44" fill="#1e293b" />
-                <rect x="74" y="34" width="12" height="40" fill="#e2e8f0" />
-                <path d="M72 34 L 80 24 L 88 34 Z" fill="#f8fafc" />
-                <motion.rect x="76" y="44" width="8" height="30" fill="#bae6fd" opacity="0.8" animate={{ opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 1.6, repeat: Infinity }} />
+            </motion.g>
+            <Sea fast={active} />
+        </>
+    )
+}
+
+// Alabasta: Crocodile's sandstorm hides the kingdom until the Log Pose locks on; then the crew's X appears.
+const GRAINS = Array.from({ length: 26 }, (_, i) => {
+    const r = makeRand(i + 3)
+    return { y: 8 + r() * 62, len: 4 + r() * 9, dur: 1.1 + r() * 1.4, delay: r() * 1.5 }
+})
+function AlabastaScene({ active }: SceneProps) {
+    return (
+        <>
+            <Sky id="sky-alabasta" from="#9a3412" to="#fbbf24" />
+            <circle cx="128" cy="24" r="10" fill="#fff7ed" />
+            <path d="M28 74 L 74 30 L 120 74 Z" fill="#78350f" />
+            <path d="M74 30 L 120 74 L 96 74 Z" fill="#451a03" opacity="0.6" />
+            <path d="M104 74 L 130 50 L 156 74 Z" fill="#92400e" />
+            <path d="M0 74 Q 40 64 80 74 T 160 74 V 80 H 0 Z" fill="#d97706" />
+            <motion.g initial={false} animate={{ opacity: active ? 0 : 1 }} transition={{ duration: 0.9 }}>
+                <rect width="160" height="90" fill="#d97706" opacity="0.45" />
+                {GRAINS.map((g, i) => (
+                    <motion.rect key={i} x={-20} y={g.y} width={g.len} height="1.6" rx="1" fill="#fde68a" opacity="0.9" animate={{ x: [0, 200] }} transition={{ duration: g.dur, delay: g.delay, repeat: Infinity, ease: 'linear' }} />
+                ))}
+            </motion.g>
+            <g stroke="#fff7ed" strokeWidth="3" strokeLinecap="round" fill="none">
+                <motion.path d="M22 22 L 36 36" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ delay: active ? 0.7 : 0, duration: 0.25 }} />
+                <motion.path d="M36 22 L 22 36" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ delay: active ? 1.0 : 0, duration: 0.25 }} />
             </g>
-        ),
-    },
-    {
-        id: 'alabasta', name: 'Alabasta', saga: 'Arabasta Saga · Desert Kingdom',
-        moment: 'The X on every arm', tie: 'First real crew. Agile team, Java, JUnit, no shortcuts.', sky: ['#9a3412', '#fbbf24'], sun: '#fff7ed',
-        scene: (
-            <g>
-                <path d="M28 74 L 74 30 L 120 74 Z" fill="#78350f" />
-                <path d="M74 30 L 120 74 L 96 74 Z" fill="#451a03" opacity="0.6" />
-                <path d="M104 74 L 130 50 L 156 74 Z" fill="#92400e" />
-                <path d="M0 74 Q 40 64 80 74 T 160 74 V 80 H 0 Z" fill="#d97706" />
-                <motion.g stroke="#fff7ed" strokeWidth="3" strokeLinecap="round" initial={{ opacity: 0 }} whileInView={{ opacity: 0.9 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
-                    <line x1="22" y1="22" x2="36" y2="36" /><line x1="36" y1="22" x2="22" y2="36" />
+            <Sea fast={active} />
+        </>
+    )
+}
+
+// East Blue: Shanks's straw hat drops onto Foosha's shore as the island scrolls in; the windmill turns.
+function EastBlueScene({ active }: SceneProps) {
+    return (
+        <>
+            <Sky id="sky-eastblue" from="#0369a1" to="#7dd3fc" />
+            <circle cx="128" cy="24" r="10" fill="#fef9c3" />
+            <motion.path d="M96 22 q 4 -4 8 0 q 4 -4 8 0" stroke="#f8fafc" strokeWidth="1" fill="none" animate={{ x: [0, 18, 0], y: [0, -4, 0] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }} />
+            <motion.path d="M30 30 q 3 -3 6 0 q 3 -3 6 0" stroke="#f8fafc" strokeWidth="1" fill="none" animate={{ x: [0, 14, 0], y: [0, 3, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
+            <path d="M0 74 Q 50 58 100 70 T 160 74 Z" fill="#15803d" />
+            <path d="M72 74 L 76 42 H 84 L 88 74 Z" fill="#78350f" />
+            <g transform="translate(80 42)">
+                <motion.g animate={{ rotate: 360 }} transition={{ duration: active ? 4 : 9, repeat: Infinity, ease: 'linear' }}>
+                    {[0, 90, 180, 270].map((r) => (
+                        <rect key={r} x="-2" y="-26" width="4" height="26" rx="1" fill="#f8fafc" transform={`rotate(${r})`} />
+                    ))}
                 </motion.g>
+                <circle r="3" fill="#dc2626" />
             </g>
-        ),
-    },
-    {
-        id: 'eastblue', name: 'East Blue', saga: 'Romance Dawn · Foosha Village',
-        moment: 'Shanks hands over the straw hat', tie: 'Where the voyage started: a two-month internship.', sky: ['#0369a1', '#7dd3fc'], sun: '#fef9c3',
-        scene: (
-            <g>
-                <path d="M0 74 Q 50 58 100 70 T 160 74 Z" fill="#15803d" />
-                <path d="M72 74 L 76 42 H 84 L 88 74 Z" fill="#78350f" />
+            <motion.g initial={{ y: -80, rotate: -30, opacity: 0 }} whileInView={{ y: 0, rotate: 0, opacity: 1 }} viewport={{ once: true }} transition={{ type: 'spring', stiffness: 80, damping: 11, delay: 0.5 }}>
                 <ellipse cx="30" cy="66" rx="13" ry="3.5" fill="#fbbf24" />
                 <path d="M20 66 Q 30 50 40 66 Z" fill="#fcd34d" />
                 <rect x="21.5" y="61" width="17" height="2.5" fill="#dc2626" />
-                <g transform="translate(80 42)">
-                    <motion.g animate={{ rotate: 360 }} transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}>
-                        {[0, 90, 180, 270].map((r) => (
-                            <rect key={r} x="-2" y="-26" width="4" height="26" rx="1" fill="#f8fafc" transform={`rotate(${r})`} />
-                        ))}
-                    </motion.g>
-                    <circle r="3" fill="#dc2626" />
-                </g>
-            </g>
-        ),
-    },
+            </motion.g>
+            <Sea fast={active} />
+        </>
+    )
+}
+
+const ARCS: Arc[] = [
+    { id: 'wano', name: 'Wano Country', saga: 'Final Saga · Onigashima raid', moment: 'Gear 5: the Drums of Liberation', tie: 'Peak form. Leading the raid on the Compliance Hydra.', accent: '#fafafa', Scene: WanoScene },
+    { id: 'marineford', name: 'Marineford', saga: 'Summit War · Marine HQ', moment: '“The One Piece… is real!”', tie: 'One demo in front of HSBC that changed everything.', accent: '#cbd5e1', Scene: MarinefordScene },
+    { id: 'enies', name: 'Enies Lobby', saga: 'Water 7 Saga · Gates of Justice', moment: '“I want to live!” · the flag goes up in flames', tie: 'Declared war on manual scheduling. Won an award for it.', accent: '#38bdf8', Scene: EniesScene },
+    { id: 'alabasta', name: 'Alabasta', saga: 'Arabasta Saga · Desert Kingdom', moment: 'The X on every arm', tie: 'First real crew. Agile team, Java, JUnit, no shortcuts.', accent: '#fbbf24', Scene: AlabastaScene },
+    { id: 'eastblue', name: 'East Blue', saga: 'Romance Dawn · Foosha Village', moment: 'Shanks hands over the straw hat', tie: 'Where the voyage started: a two-month internship.', accent: '#dc2626', Scene: EastBlueScene },
 ]
 
-// A Grand Line island: gradient sky, sun, the arc's landmark, and a sea that never stops moving.
-function Island({ arc, active }: { arc: Arc; active: boolean }) {
+function Island({ arc, active, className }: { arc: Arc; active: boolean; className?: string }) {
     return (
-        <svg viewBox="0 0 160 90" className="w-full h-auto block" aria-hidden>
-            <defs>
-                <linearGradient id={`sky-${arc.id}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor={arc.sky[0]} />
-                    <stop offset="1" stopColor={arc.sky[1]} />
-                </linearGradient>
-            </defs>
-            <rect width="160" height="90" fill={`url(#sky-${arc.id})`} />
-            <motion.circle cx="128" cy="24" r="10" fill={arc.sun} animate={{ scale: active ? [1, 1.15, 1] : 1 }} transition={{ duration: 2.5, repeat: Infinity }} style={{ originX: '128px', originY: '24px' }} />
-            {arc.scene}
-            <motion.path
-                d="M-40 76 Q -20 70 0 76 T 40 76 T 80 76 T 120 76 T 160 76 T 200 76 V 90 H -40 Z"
-                fill="#082f49"
-                opacity="0.95"
-                animate={{ x: [0, -40] }}
-                transition={{ duration: active ? 1.6 : 3.2, repeat: Infinity, ease: 'linear' }}
-            />
+        <svg viewBox="0 0 160 90" className={className ?? 'w-full h-auto block'} aria-hidden>
+            <arc.Scene active={active} />
         </svg>
     )
 }
@@ -227,20 +302,18 @@ export default function Experience() {
                                 <motion.div
                                     animate={active === i ? { y: [0, -5, 0] } : { y: 0 }}
                                     transition={active === i ? { duration: 3, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
-                                    className={clsx(
-                                        'rounded-xl overflow-hidden border bg-zinc-950/80 transition-[box-shadow,border-color,transform] duration-500',
-                                        active === i ? 'border-sky-400/80 shadow-[0_0_30px_rgba(56,189,248,0.35)] scale-[1.04]' : 'border-white/10 shadow-xl shadow-black/60',
-                                    )}
+                                    style={active === i ? { borderColor: ARCS[i].accent, boxShadow: `0 0 32px ${ARCS[i].accent}55` } : undefined}
+                                    className={clsx('rounded-xl overflow-hidden border bg-zinc-950/80 transition-[box-shadow,border-color,transform] duration-500', active === i ? 'scale-[1.04]' : 'border-white/10 shadow-xl shadow-black/60')}
                                 >
                                     <Island arc={ARCS[i]} active={active === i} />
                                     <div className="p-3 space-y-1">
                                         <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
                                             <span>Arc {String(count - i).padStart(2, '0')}</span>
-                                            {active === i && <span className="text-sky-400 animate-pulse">◉ Log Pose</span>}
+                                            {active === i && <span className="animate-pulse" style={{ color: ARCS[i].accent }}>◉ Log Pose</span>}
                                         </div>
                                         <div className="text-sm font-black text-white leading-tight">{ARCS[i].name}</div>
                                         <div className="text-[10px] text-white/50 leading-snug">{ARCS[i].saga}</div>
-                                        <div className="pt-1.5 text-[11px] italic text-sky-200/85 leading-snug">{ARCS[i].moment}</div>
+                                        <div className="pt-1.5 text-[11px] italic leading-snug" style={{ color: active === i ? ARCS[i].accent : 'rgba(186,230,253,0.85)' }}>{ARCS[i].moment}</div>
                                         <div className="text-[9.5px] text-white/35 leading-snug">{ARCS[i].tie}</div>
                                         <div className="pt-1 text-[10px] font-mono text-white/40">{job.start} – {job.end}</div>
                                     </div>
@@ -265,8 +338,8 @@ export default function Experience() {
                                 <div className={'relative p-5 md:p-8 rounded-2xl bg-white/5 border hover:bg-white/10 transition-all duration-300 backdrop-blur-sm group-hover:border-red-500/20 ' + (job.end === 'Present' ? 'border-red-500/30 shadow-[0_0_30px_rgba(220,38,38,0.25)]' : 'border-white/10')}>
 
                                     {/* Mobile: island chip */}
-                                    <div className="md:hidden mb-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 px-2.5 py-1 rounded-full border border-white/10 bg-white/5">
-                                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: `linear-gradient(${ARCS[i].sky[0]}, ${ARCS[i].sky[1]})` }} />
+                                    <div className="md:hidden mb-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 pl-2 pr-3 py-1 rounded-full border border-white/10 bg-white/5">
+                                        <Island arc={ARCS[i]} active={active === i} className="w-14 h-8 rounded-md shrink-0 -ml-1" />
                                         <span className="text-xs font-bold text-white/85">{ARCS[i].name}</span>
                                         <span className="text-[11px] font-mono text-white/40">{job.start} – {job.end}</span>
                                     </div>
