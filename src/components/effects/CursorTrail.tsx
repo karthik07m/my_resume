@@ -50,8 +50,15 @@ export default function CursorTrail() {
         }
         window.addEventListener('mousemove', handleMouseMove)
 
-        // Animation loop
+        // Animation loop. Idle most of the time: skip the full-screen clear when there is nothing left to fade out.
+        let idle = false
         const animate = () => {
+            if (particlesRef.current.length === 0) {
+                if (!idle) { ctx.clearRect(0, 0, canvas.width, canvas.height); idle = true }
+                animationRef.current = requestAnimationFrame(animate)
+                return
+            }
+            idle = false
             ctx.clearRect(0, 0, canvas.width, canvas.height)
 
             // Update and draw particles
@@ -66,10 +73,6 @@ export default function CursorTrail() {
                     ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
                     ctx.fillStyle = `rgba(0, 255, 65, ${particle.life * 0.5})`
                     ctx.fill()
-
-                    // Glow effect
-                    ctx.shadowBlur = 10
-                    ctx.shadowColor = '#00ff41'
 
                     return true
                 }

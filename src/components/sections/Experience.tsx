@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
+import { motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import resume from '@/data/resume.json'
@@ -203,9 +203,12 @@ const ARCS: Arc[] = [
 ]
 
 function Island({ arc, active, className }: { arc: Arc; active: boolean; className?: string }) {
+    // Only the islands near the viewport animate. A display:none copy (the other breakpoint's) never intersects, so it never mounts.
+    const ref = useRef<SVGSVGElement>(null)
+    const near = useInView(ref, { margin: '30% 0px' })
     return (
-        <svg viewBox="0 0 160 90" className={className ?? 'w-full h-auto block'} aria-hidden>
-            <arc.Scene active={active} />
+        <svg ref={ref} viewBox="0 0 160 90" className={className ?? 'w-full h-auto block'} aria-hidden>
+            {near && <arc.Scene active={active} />}
         </svg>
     )
 }

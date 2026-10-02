@@ -42,7 +42,7 @@ export default function Projects() {
                             whileHover={{ y: -6 }}
                             viewport={{ once: true, margin: '-10%' }}
                             transition={{ delay: i * 0.08, type: 'spring', stiffness: 220, damping: 24 }}
-                            className="group relative p-6 rounded-xl bg-black/40 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-900/10 transition-all duration-300 backdrop-blur-md overflow-hidden flex flex-col"
+                            className="group relative p-6 rounded-xl bg-black/60 border border-blue-500/30 hover:border-blue-400 hover:bg-blue-900/10 transition-all duration-300 overflow-hidden flex flex-col"
                         >
                             {/* System Window Effect: top bar + corner brackets */}
                             {['top-1 left-1 border-t-2 border-l-2', 'top-1 right-1 border-t-2 border-r-2', 'bottom-1 left-1 border-b-2 border-l-2', 'bottom-1 right-1 border-b-2 border-r-2'].map((c) => (

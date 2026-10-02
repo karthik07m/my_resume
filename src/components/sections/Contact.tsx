@@ -1,7 +1,7 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useRef, useState } from 'react'
 import BugSmasher from '@/components/games/BugSmasher'
 import MagneticButton from '@/components/ui/MagneticButton'
 import resume from '@/data/resume.json'
@@ -57,6 +57,8 @@ export default function Contact() {
     const [playing, setPlaying] = useState(false)
     const [crow, setCrow] = useState(false)
     const [copied, setCopied] = useState(false)
+    const sectionRef = useRef<HTMLElement>(null)
+    const near = useInView(sectionRef, { margin: '20% 0px' })
 
     const sendCrow = () => {
         setCrow(true)
@@ -73,8 +75,8 @@ export default function Contact() {
     }
 
     return (
-        <section className="relative md:min-h-screen w-full flex flex-col justify-center pt-16 pb-24 md:py-24 bg-transparent overflow-hidden">
-            <Waves />
+        <section ref={sectionRef} className="relative md:min-h-screen w-full flex flex-col justify-center pt-16 pb-24 md:py-24 bg-transparent overflow-hidden">
+            {near && <Waves />}
 
             <div className="relative z-20 w-full max-w-[1100px] mx-auto px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center">
 
@@ -187,7 +189,7 @@ export default function Contact() {
                                 target={c.href.startsWith('http') ? '_blank' : undefined}
                                 rel="noopener noreferrer"
                                 style={{ '--breath': c.color } as React.CSSProperties}
-                                className="group relative flex items-center gap-4 p-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[var(--breath)] hover:bg-white/[0.07] hover:-translate-y-0.5 transition-all duration-300 backdrop-blur-sm overflow-hidden"
+                                className="group relative flex items-center gap-4 p-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[var(--breath)] hover:bg-white/[0.07] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
                             >
                                 <span className="w-1 self-stretch rounded-full bg-[var(--breath)] shadow-[0_0_10px_var(--breath)] shrink-0" />
                                 <span className="flex-1 min-w-0">

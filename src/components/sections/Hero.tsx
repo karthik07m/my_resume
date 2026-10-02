@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import resume from '@/data/resume.json'
 import SpeedLines from '@/components/effects/SpeedLines'
 import EnergyParticles from '@/components/effects/EnergyParticles'
@@ -49,6 +49,9 @@ export default function Hero() {
     const sharingan = FORMS[form] === 'Mangekyō'
     // Phones skip the two 2D particle canvases: the 3D hero + star field is enough work for a mobile GPU.
     const isDesktop = useMediaQuery('(min-width: 768px)')
+    // Everything animated in the hero pauses once it scrolls away; it was burning CPU under every other section.
+    const sectionRef = useRef<HTMLElement>(null)
+    const heroVisible = useInView(sectionRef, { margin: '10% 0px' })
 
     const scrollToSection = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -73,9 +76,9 @@ export default function Hero() {
     }, [fullText])
 
     return (
-        <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-transparent">
-            {isDesktop && <SpeedLines />}
-            {isDesktop && <EnergyParticles />}
+        <section ref={sectionRef} className="relative min-h-screen w-full flex items-center overflow-hidden bg-transparent">
+            {isDesktop && heroVisible && <SpeedLines />}
+            {isDesktop && heroVisible && <EnergyParticles />}
 
             <div className="relative z-20 w-full max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center h-full pt-20 pb-10 lg:pt-0 lg:pb-0">
 
@@ -91,7 +94,7 @@ export default function Hero() {
                             animate={{ opacity: 1, y: 0 }}
                             onClick={onBadgeTap}
                             title="Tap three times…"
-                            className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 cursor-pointer select-none"
+                            className="inline-flex items-center gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-zinc-900/80 border border-white/10 cursor-pointer select-none"
                         >
                             <div className="w-2 h-2 rounded-full animate-pulse bg-green-500 shrink-0" />
                             <span className="text-[11px] sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase text-green-500">
@@ -178,7 +181,7 @@ export default function Hero() {
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
                         <div className={clsx('w-48 h-48 sm:w-72 sm:h-72 lg:w-[440px] lg:h-[440px] rounded-full blur-3xl transition-colors duration-700', sharingan ? 'bg-red-600/30' : 'bg-emerald-500/15')} />
                     </div>
-                    <Canvas camera={{ position: [0, 0, 6] }} dpr={[1, 1.5]}>
+                    <Canvas camera={{ position: [0, 0, 6] }} dpr={[1, 1.5]} frameloop={heroVisible ? 'always' : 'never'}>
                         <ambientLight intensity={0.5} />
                         <directionalLight position={[10, 10, 5]} intensity={1} />
                         <CodingShape form={form} onTap={nextForm} />

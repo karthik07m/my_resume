@@ -25,8 +25,9 @@ export default function Home() {
       <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
         {/* Background Stars */}
         <div className="fixed inset-0 z-0 pointer-events-none sage-shift" aria-hidden>
-          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]}>
-            <Stars radius={100} depth={50} count={isDesktop ? 5000 : 1500} factor={4} saturation={0} fade speed={1} />
+          {/* frameloop="demand": the stars render once and never again, instead of a full WebGL frame every 16ms for the whole visit */}
+          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]} frameloop="demand">
+            <Stars radius={100} depth={50} count={isDesktop ? 4000 : 1200} factor={4} saturation={0} fade speed={0} />
           </Canvas>
         </div>
 

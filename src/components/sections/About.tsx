@@ -85,7 +85,7 @@ export default function About() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    className="bg-black/40 backdrop-blur-md border border-white/10 p-4 rounded-xl"
+                                    className="bg-black/60 border border-white/10 p-4 rounded-xl"
                                 >
                                     <div className="text-3xl mb-2">{stat.icon}</div>
                                     <div className="text-xl sm:text-2xl font-bold text-white font-mono">{stat.value}</div>
@@ -115,7 +115,7 @@ export default function About() {
                 <div className="relative z-10 space-y-8">
                     {/* Mission Report (Bio) */}
                     <motion.div
-                        className="bg-black/60 backdrop-blur-xl border border-orange-500/30 p-5 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden group"
+                        className="bg-black/80 border border-orange-500/30 p-5 sm:p-8 rounded-2xl shadow-2xl relative overflow-hidden group"
                         initial={{ opacity: 0, x: 50 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
