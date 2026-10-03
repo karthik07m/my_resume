@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const MIN_MS = 900
-const MAX_MS = 3000
+const MIN_MS = 700
+const MAX_MS = 1500
 
 // One line per franchise on the site, cycled while the page loads.
 const LINES = [

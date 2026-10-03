@@ -47,7 +47,8 @@ export default function Navigation() {
                 <li>
                     <a
                         href={`${base}/${resume.resumeFile}`}
-                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="block px-2.5 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-sm font-bold text-black bg-green-500 hover:bg-green-400 transition-colors rounded-full"
                     >
                         Résumé

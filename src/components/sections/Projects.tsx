@@ -3,6 +3,14 @@
 import { motion } from 'framer-motion'
 import resume from '@/data/resume.json'
 
+// Solo Leveling: every shipped project is a shadow extracted into the army, in resume.json order.
+const SHADOWS = [
+    { name: 'Igris', lore: 'The first knight to kneel. Still on duty years later.' },
+    { name: 'Beru', lore: 'The Ant King: evolved fast by feeding on everything it met.' },
+    { name: 'Iron', lore: 'The shield bearer. Nothing gets past it, data included.' },
+    { name: 'Kaisel', lore: 'The flying mount, always hovering at your side, like DOT.' },
+]
+
 export default function Projects() {
     return (
         <section className="relative md:min-h-screen w-full flex items-center justify-center py-12 md:py-20 bg-transparent">
@@ -54,17 +62,18 @@ export default function Projects() {
                                 <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
                                     {project.name}
                                 </h3>
-                                <span className="text-[10px] font-mono text-blue-300 bg-blue-900/30 px-2 py-1 rounded border border-blue-500/30">
-                                    HUNTER RANK S{project.year && ` · ${project.year}`}
+                                <span title={SHADOWS[i]?.lore} className="shrink-0 text-[10px] font-mono uppercase text-violet-300 bg-violet-900/30 px-2 py-1 rounded border border-violet-500/30">
+                                    {SHADOWS[i] ? `Shadow · ${SHADOWS[i].name}` : 'Hunter'}{project.year && ` · ${project.year}`}
                                 </span>
                             </div>
                             <p className="text-xs font-mono text-blue-300/60 mb-4">{project.kind}</p>
+                            {SHADOWS[i] && <p className="-mt-3 mb-4 text-[11px] italic text-violet-300/60">{SHADOWS[i].lore}</p>}
 
                             <p className="text-sm text-blue-100/70 mb-6 flex-grow">{project.description}</p>
 
                             <div className="flex items-center justify-between mt-auto">
-                                <span className="text-[10px] font-bold px-2 py-1 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20 uppercase tracking-widest">
-                                    Dungeon Cleared
+                                <span className="text-[10px] font-black px-2 py-1 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20 uppercase tracking-[0.3em] transition-shadow group-hover:shadow-[0_0_14px_rgba(139,92,246,0.7)]">
+                                    Arise
                                 </span>
                                 <span className="text-sm text-blue-400 group-hover:underline">{project.linkLabel} ↗</span>
                             </div>

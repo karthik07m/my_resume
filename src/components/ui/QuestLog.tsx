@@ -75,7 +75,8 @@ export default function QuestLog() {
             </div>
 
             {/* Toasts */}
-            <div className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:translate-x-0 z-[60] flex flex-col gap-2 items-center sm:items-end pointer-events-none w-[calc(100vw-2rem)] sm:w-auto">
+            {/* xl+ only: below that the toast sits on top of the job cards. The LV badge still counts up everywhere. */}
+            <div className="hidden xl:flex fixed bottom-16 right-4 z-[60] flex-col gap-2 items-end pointer-events-none">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <motion.div

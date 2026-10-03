@@ -170,7 +170,9 @@ export default function Contact() {
                         </button>
                     </motion.div>
 
-                    <p className="text-xs font-mono text-white/35">{resume.location} · {resume.title}</p>
+                    <p className="text-xs font-mono text-white/35">
+                        {resume.location} · {resume.title} · <a href={`${base}/${resume.resumeDocx}`} download className="underline decoration-dotted underline-offset-4 hover:text-white/70">Résumé as .docx</a>
+                    </p>
                 </div>
 
                 {/* Right: every channel, one breathing style each */}

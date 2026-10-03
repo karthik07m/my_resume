@@ -19,13 +19,17 @@ const [firstName, lastName] = (() => {
     return [parts.slice(0, -1).join(' '), parts.at(-1)]
 })()
 
-const appianYears = Math.floor((Date.now() - new Date('2018-11-01').getTime()) / (365.25 * 24 * 3600 * 1000))
 const clientCount = new Set(resume.experience.map((j) => j.client).filter(Boolean)).size
 
+// Real numbers, read straight off the timeline.
 const STATS = [
-    { label: 'Appian yrs', val: `${appianYears}` },
+    { label: 'Appian yrs', val: '7+' },
     { label: 'Clients', val: `${clientCount}` },
     { label: 'Appian ver.', val: '18→26' },
+]
+
+// Ninja-registry stats: styled smaller and dimmer so nobody mistakes them for the real ones above.
+const POWER_LEVELS = [
     { label: 'Bugs slain', val: '9000+' },
     { label: 'Chakra', val: '∞' },
     { label: '8 Gates', val: 'OPEN' },
@@ -80,7 +84,7 @@ export default function Hero() {
             {isDesktop && heroVisible && <SpeedLines />}
             {isDesktop && heroVisible && <EnergyParticles />}
 
-            <div className="relative z-20 w-full max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center h-full pt-20 pb-10 lg:pt-0 lg:pb-0">
+            <div className="relative z-20 w-full max-w-[1400px] mx-auto px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center h-full pt-20 pb-10 lg:pt-28 lg:pb-12">
 
                 {/* Left Column: Text Content */}
                 <div className="flex flex-col items-start space-y-5 lg:space-y-8 pointer-events-auto text-left order-2 lg:order-1 w-full">
@@ -143,20 +147,33 @@ export default function Hero() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 }}
-                        className="grid grid-cols-4 sm:flex sm:flex-wrap justify-start gap-3 sm:gap-8 md:gap-12 py-5 sm:py-6 border-t border-b border-white/10 w-full"
+                        className="w-full py-5 sm:py-6 border-t border-b border-white/10 space-y-4"
                     >
-                        {STATS.map((stat, i) => (
-                            <motion.div
-                                key={stat.label}
-                                initial={{ opacity: 0, y: 14 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.8 + i * 0.06, type: 'spring', stiffness: 220, damping: 24 }}
-                                className="flex flex-col gap-1 items-start"
-                            >
-                                <div className="text-[10px] text-white/40 uppercase tracking-[0.15em] sm:tracking-[0.2em] leading-tight sm:whitespace-nowrap">{stat.label}</div>
-                                <div className="text-xl sm:text-2xl md:text-3xl font-black tabular-nums text-green-500">{stat.val}</div>
-                            </motion.div>
-                        ))}
+                        <div className="flex flex-wrap justify-start gap-6 sm:gap-12">
+                            {STATS.map((stat, i) => (
+                                <motion.div
+                                    key={stat.label}
+                                    initial={{ opacity: 0, y: 14 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8 + i * 0.06, type: 'spring', stiffness: 220, damping: 24 }}
+                                    className="flex flex-col gap-1 items-start"
+                                >
+                                    <div className="text-[10px] text-white/50 uppercase tracking-[0.15em] sm:tracking-[0.2em] leading-tight sm:whitespace-nowrap">{stat.label}</div>
+                                    <div className="text-2xl sm:text-3xl font-black tabular-nums text-green-500">{stat.val}</div>
+                                </motion.div>
+                            ))}
+                        </div>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.2 }}
+                            className="flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-white/35"
+                        >
+                            <span className="text-orange-400/60">Ninja registry (unverified):</span>
+                            {POWER_LEVELS.map((p) => (
+                                <span key={p.label}>{p.label} <span className="text-white/60">{p.val}</span></span>
+                            ))}
+                        </motion.div>
                     </motion.div>
 
                     {/* CTA Buttons */}

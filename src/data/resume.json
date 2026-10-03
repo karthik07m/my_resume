@@ -1,10 +1,11 @@
 {
     "name": "Mani Karthik Bollimuntha",
     "title": "Senior Lead Appian Developer",
-    "tagline": "Seven years building process automation on Appian for federal, banking, and pharma clients. Appian Level 2 Certified.",
+    "tagline": "7+ years in Appian development, building process automation for federal, banking, and pharma clients. Appian Level 2 Certified.",
     "location": "Herndon, VA",
     "email": "manikarthik@live.com",
-    "resumeFile": "Mani_Karthik_Resume.docx",
+    "resumeFile": "Mani_Karthik_Resume.pdf",
+    "resumeDocx": "Mani_Karthik_Resume.docx",
     "links": {
         "github": "https://github.com/karthik07m",
         "linkedin": "https://www.linkedin.com/in/mani-karthik-bollimuntha-b30268b7/"
@@ -26,7 +27,7 @@
                 "REST / SOAP Integrations",
                 "Expression & Decision Rules",
                 "Security (Groups / RBAC)",
-                "Versions 18 through 25"
+                "Versions 18 through 26"
             ]
         },
         {

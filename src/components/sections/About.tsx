@@ -13,14 +13,16 @@ const groupTheme = [
     { name: 'Sage Mode', icon: '☁️' },
 ]
 
-// Akashi's Emperor Eye: red and gold eyes that follow the pointer, so the section literally sees your next move.
-function EmperorEye() {
+// Kuroko's Misdirection: pale blue eyes that follow the pointer, and fade out the closer you get. Look straight at him and he's gone.
+function KurokoEyes() {
     const eyes = useRef<HTMLDivElement>(null)
     useEffect(() => {
         const el = eyes.current
         if (!el) return
         const irises = el.querySelectorAll<HTMLElement>('[data-iris]')
         const onMove = (e: PointerEvent) => {
+            const b = el.getBoundingClientRect()
+            el.style.opacity = String(Math.min(1, Math.max(0.08, Math.hypot(e.clientX - (b.left + b.width / 2), e.clientY - (b.top + b.height / 2)) / 220)))
             irises.forEach((iris) => {
                 const r = iris.parentElement!.getBoundingClientRect()
                 const dx = e.clientX - (r.left + r.width / 2)
@@ -34,13 +36,13 @@ function EmperorEye() {
         return () => window.removeEventListener('pointermove', onMove)
     }, [])
     return (
-        <div ref={eyes} className="inline-flex gap-1.5" title="Emperor Eye" aria-hidden>
-            {['#dc2626', '#f59e0b'].map((c) => (
-                <div key={c} className="relative w-8 h-5 rounded-[50%] bg-zinc-100 overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
+        <div ref={eyes} className="inline-flex gap-1.5 transition-opacity duration-300" title="Misdirection" aria-hidden>
+            {['left', 'right'].map((side) => (
+                <div key={side} className="relative w-8 h-5 rounded-[50%] bg-zinc-100 overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
                     <div
                         data-iris
                         className="absolute left-1/2 top-1/2 w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full transition-transform duration-75"
-                        style={{ background: `radial-gradient(circle, #000 32%, ${c} 36%, ${c} 80%, #000 84%)` }}
+                        style={{ background: `radial-gradient(circle, #000 32%, #7dd3fc 36%, #7dd3fc 80%, #000 84%)` }}
                     />
                 </div>
             ))}
@@ -51,7 +53,7 @@ function EmperorEye() {
 const skillCount = resume.skills.reduce((n, g) => n + g.items.length, 0)
 
 const stats = [
-    { label: 'Experience', value: '7+ Years', icon: '📅' },
+    { label: 'Appian Experience', value: '7+ Years', icon: '📅' },
     { label: 'Level', value: 'Senior', icon: '🥋' },
     { label: 'Certification', value: 'Appian L2', icon: '🏅' },
     { label: 'Tech Stack', value: `${skillCount}+`, icon: '⚡' }
@@ -69,7 +71,7 @@ export default function About() {
                         viewport={{ once: true }}
                     >
                         <div className="inline-flex items-center gap-3 px-4 py-2 mb-4 rounded-full bg-orange-500/10 border border-orange-500/20 backdrop-blur-xl">
-                            <EmperorEye />
+                            <KurokoEyes />
                             <span className="text-sm font-bold tracking-[0.2em] uppercase text-orange-500">Seirin · Phantom Sixth Man</span>
                         </div>
                         <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 drop-shadow-lg">

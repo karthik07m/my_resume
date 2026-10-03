@@ -1,10 +1,11 @@
 'use client'
 
-import { motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
+import { Fragment, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import resume from '@/data/resume.json'
 import { haki } from '@/components/ui/Haki'
+import { toMonths } from '@/lib/years'
 
 // Zoro's Santoryu in the header: one sword per core discipline.
 const SWORDS = [
@@ -450,6 +451,74 @@ function JobCard({ job, arc, index, active }: { job: Job; arc: Arc; index: numbe
     )
 }
 
+// A break of more than half a year between jobs gets a timeskip marker, filled with whatever study overlaps it,
+// so a recruiter reading only the timeline doesn't see an unexplained gap.
+function timeskip(i: number) {
+    const prev = resume.experience[i + 1]
+    if (!prev || toMonths(resume.experience[i].start) - toMonths(prev.end) <= 6) return null
+    return { from: prev.end, to: resume.experience[i].start, study: resume.education.find((e) => e.period.startsWith(prev.end.split(' ')[1])) }
+}
+
+function Timeskip({ from, to, study }: NonNullable<ReturnType<typeof timeskip>>) {
+    return (
+        <div className="relative grid grid-cols-[auto_1fr] md:grid-cols-[200px_auto_1fr] gap-3 md:gap-12">
+            <div className="hidden md:block" />
+            <div className="relative flex flex-col items-center">
+                <div className="flex-grow w-px border-l border-dashed border-sky-400/40" />
+                <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rotate-45 bg-black border-2 border-sky-400 z-10" />
+            </div>
+            <div className="my-4 md:my-6 px-4 py-3 rounded-lg border border-dashed border-sky-400/30 bg-sky-950/20">
+                <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-sky-300/70">Timeskip · {from} – {to}</div>
+                {study ? (
+                    <div className="mt-1 text-sm text-white/80">
+                        Training arc: <span className="font-bold text-white">{study.degree}</span>, {study.school}{study.note && <span className="text-white/50"> · {study.note}</span>}
+                    </div>
+                ) : (
+                    <div className="mt-1 text-sm text-white/60">Off the Grand Line.</div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+// Arcs are newest first, so every arc from Enies Lobby down is Going Merry territory.
+const MERRY_UNTIL = ARCS.findIndex((a) => a.id === 'enies')
+
+function Ship({ kind }: { kind: 'merry' | 'sunny' }) {
+    return (
+        <motion.svg
+            viewBox="0 0 40 40"
+            className="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
+            animate={{ rotate: [-6, 6, -6] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+            <line x1={20} y1={4} x2={20} y2={27} stroke="#78350f" strokeWidth={1.5} />
+            <path d="M 20 5 L 33 9 L 20 13 Z" fill="#111" />
+            <circle cx={25} cy={9} r={1.6} fill="#fff" />
+            {kind === 'sunny' ? (
+                <>
+                    <path d="M 20 12 Q 31 17 20 25 Z" fill="#f8fafc" />
+                    <path d="M 20 12 Q 9 17 20 25 Z" fill="#e2e8f0" />
+                    <path d="M 5 27 L 35 27 Q 32 35 20 35 Q 8 35 5 27 Z" fill="#d97706" stroke="#78350f" strokeWidth={1} />
+                    {/* Lion figurehead */}
+                    <circle cx={33} cy={27} r={3} fill="#facc15" stroke="#78350f" strokeWidth={0.8} />
+                </>
+            ) : (
+                <>
+                    {/* One square sail with the Jolly Roger on it */}
+                    <rect x={11} y={12} width={18} height={12} rx={1} fill="#f8fafc" stroke="#cbd5e1" strokeWidth={0.6} />
+                    <circle cx={20} cy={17} r={2.2} fill="#111" />
+                    <path d="M 16 21 L 24 23 M 24 21 L 16 23" stroke="#111" strokeWidth={0.9} />
+                    <path d="M 6 27 L 33 27 Q 31 34 20 34 Q 9 34 6 27 Z" fill="#a16207" stroke="#713f12" strokeWidth={1} />
+                    {/* Sheep figurehead: white wool, curled horns */}
+                    <circle cx={34} cy={25} r={2.8} fill="#fafafa" stroke="#a3a3a3" strokeWidth={0.6} />
+                    <circle cx={35.6} cy={23.4} r={1} fill="none" stroke="#ca8a04" strokeWidth={0.7} />
+                </>
+            )}
+        </motion.svg>
+    )
+}
+
 export default function Experience() {
     // The ship sails down the timeline as you scroll through it; each job is an island on the voyage.
     const timeline = useRef<HTMLDivElement>(null)
@@ -457,7 +526,19 @@ export default function Experience() {
     const shipTop = useTransform(scrollYProgress, (v) => `${v * 100}%`)
     const count = resume.experience.length
     const [active, setActive] = useState(0)
-    useMotionValueEvent(scrollYProgress, 'change', (v) => setActive(Math.min(count - 1, Math.round(v * (count - 1)))))
+    // Canon ship swap: the Merry sails up to Enies Lobby, the Sunny from Marineford on.
+    const merry = active >= MERRY_UNTIL
+    const [funeral, setFuneral] = useState(false)
+    const funeralTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+    useMotionValueEvent(scrollYProgress, 'change', (v) => {
+        const next = Math.min(count - 1, Math.round(v * (count - 1)))
+        if (active >= MERRY_UNTIL && next < MERRY_UNTIL) {
+            setFuneral(true)
+            clearTimeout(funeralTimer.current)
+            funeralTimer.current = setTimeout(() => setFuneral(false), 2600)
+        }
+        setActive(next)
+    })
 
     return (
         <section className="relative md:min-h-screen w-full flex items-center justify-center py-12 md:py-20 bg-transparent">
@@ -511,25 +592,46 @@ export default function Experience() {
                     {/* Wake behind the ship, then the ship itself, centred on the timeline line */}
                     <div className="absolute top-0 bottom-0 left-[0.5px] md:left-[248.5px] pointer-events-none z-20" aria-hidden>
                         <motion.div style={{ height: shipTop }} className="absolute top-0 -translate-x-1/2 w-[2px] bg-gradient-to-b from-transparent to-sky-400/70" />
-                        <motion.div style={{ top: shipTop }} className="absolute -translate-x-1/2 -translate-y-1/2" title="Thousand Sunny">
-                            <motion.svg
-                                viewBox="0 0 40 40"
-                                className="w-7 h-7 md:w-10 md:h-10 drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
-                                animate={{ rotate: [-6, 6, -6] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                            >
-                                <line x1={20} y1={4} x2={20} y2={27} stroke="#78350f" strokeWidth={1.5} />
-                                <path d="M 20 5 L 33 9 L 20 13 Z" fill="#111" />
-                                <circle cx={25} cy={9} r={1.6} fill="#fff" />
-                                <path d="M 20 12 Q 31 17 20 25 Z" fill="#f8fafc" />
-                                <path d="M 20 12 Q 9 17 20 25 Z" fill="#e2e8f0" />
-                                <path d="M 5 27 L 35 27 Q 32 35 20 35 Q 8 35 5 27 Z" fill="#d97706" stroke="#78350f" strokeWidth={1} />
-                                <circle cx={33} cy={27} r={3} fill="#facc15" stroke="#78350f" strokeWidth={0.8} />
-                            </motion.svg>
+                        <motion.div style={{ top: shipTop }} className="absolute -translate-x-1/2 -translate-y-1/2">
+                            <div className="relative w-7 h-7 md:w-10 md:h-10">
+                                <AnimatePresence initial={false}>
+                                    {merry ? (
+                                        // Leaving Enies Lobby the Merry gets her Viking funeral: she burns and sinks.
+                                        <motion.div
+                                            key="merry"
+                                            className="absolute inset-0"
+                                            title="Going Merry"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1, y: 0, rotate: 0, filter: 'sepia(0) saturate(1) hue-rotate(0deg) brightness(1) drop-shadow(0 0 0px #f97316)' }}
+                                            exit={{ opacity: 0, y: 14, rotate: 25, filter: 'sepia(1) saturate(6) hue-rotate(-25deg) brightness(1.3) drop-shadow(0 0 10px #f97316)', transition: { duration: 1.8, ease: 'easeIn' } }}
+                                        >
+                                            <Ship kind="merry" />
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div key="sunny" className="absolute inset-0" title="Thousand Sunny" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ delay: 0.6 }}>
+                                            <Ship kind="sunny" />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                                <AnimatePresence>
+                                    {funeral && (
+                                        <motion.span
+                                            key="thanks"
+                                            initial={{ opacity: 0, x: 4 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0 }}
+                                            className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 whitespace-nowrap font-mono text-[10px] italic text-orange-300"
+                                        >
+                                            Thank you, Merry.
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </motion.div>
                     </div>
-                    {resume.experience.map((job, i) => (
-                        <div key={job.company + job.start} className="relative grid grid-cols-[auto_1fr] md:grid-cols-[200px_auto_1fr] gap-3 md:gap-12 group">
+                    {resume.experience.map((job, i) => { const skip = timeskip(i); return (
+                        <Fragment key={job.company + job.start}>
+                        <div className="relative grid grid-cols-[auto_1fr] md:grid-cols-[200px_auto_1fr] gap-3 md:gap-12 group">
 
                             {/* Left Column: the island this job was sailed to; the one nearest the ship is the Log Pose target */}
                             <motion.div
@@ -570,7 +672,9 @@ export default function Experience() {
                             {/* Right Column: the job card, dressed as its island */}
                             <JobCard job={job} arc={ARCS[i]} index={i} active={active === i} />
                         </div>
-                    ))}
+                        {skip && <Timeskip {...skip} />}
+                        </Fragment>
+                    ) })}
                 </div>
             </div>
         </section>
