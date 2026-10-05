@@ -1,11 +1,13 @@
 'use client'
 
-import { AnimatePresence, motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
+import { AnimatePresence, motion, useScroll, useSpring, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
 import { Fragment, useRef, useState } from 'react'
 import { clsx } from 'clsx'
 import resume from '@/data/resume.json'
 import { haki } from '@/components/ui/Haki'
 import { toMonths } from '@/lib/years'
+import { BossStage, KaidoStage, makeRand } from './BossFight'
+import { KanjiWatermark, MangaSfx } from '@/components/ui/MangaText'
 
 // Zoro's Santoryu in the header: one sword per core discipline.
 const SWORDS = [
@@ -30,32 +32,45 @@ function Katana({ hilt }: { hilt: string }) {
 // One island per job, newest first to match resume.experience: the career sailed from East Blue to Wano.
 // Every island has a mechanic only it has, triggered when the ship (Log Pose) is nearest.
 type SceneProps = { active: boolean }
-type Arc = { id: string; name: string; saga: string; moment: string; tie: string; accent: string; Scene: (p: SceneProps) => React.ReactElement }
+type Arc = { id: string; name: string; saga: string; moment: string; tie: string; accent: string; sky: [string, string]; Scene: (p: SceneProps) => React.ReactElement }
 
-const makeRand = (seed: number) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)
-
+// A scene is drawn in a 160×90 box that sits centred in its stage, and the stage is usually far wider than that.
+// So the sky, the sea and the ground run well past the box on every side (FAR), which makes the island, its water
+// and the ground the fighters stand on one picture from edge to edge, not a picture laid over a backdrop.
+const FAR = { x: -480, width: 1120 }
 function Sky({ id, from, to }: { id: string; from: string; to: string }) {
     return (
         <>
             <defs>
-                <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="90">
                     <stop offset="0" stopColor={from} />
                     <stop offset="1" stopColor={to} />
                 </linearGradient>
             </defs>
-            <rect width="160" height="90" fill={`url(#${id})`} />
+            <rect {...FAR} y="-90" height="270" fill={`url(#${id})`} />
         </>
     )
 }
+// One crest and one trough every 80 units, so sliding the path by 80 loops without a seam.
+const WAVES = `M-480 76 Q -460 70 -440 76${Array.from({ length: 28 }, (_, i) => ` T ${-400 + i * 40} 76`).join('')} V 180 H -480 Z`
 function Sea({ fast }: { fast: boolean }) {
     return (
         <motion.path
-            d="M-40 76 Q -20 70 0 76 T 40 76 T 80 76 T 120 76 T 160 76 T 200 76 V 90 H -40 Z"
+            d={WAVES}
             fill="#082f49"
             opacity={0.95}
-            animate={{ x: [0, -40] }}
-            transition={{ duration: fast ? 1.6 : 3.2, repeat: Infinity, ease: 'linear' }}
+            animate={{ x: [0, -80] }}
+            transition={{ duration: fast ? 3.2 : 6.4, repeat: Infinity, ease: 'linear' }}
         />
+    )
+}
+// The strip of ground the fighters stand on, in front of the sea.
+function Ground({ fill, edge }: { fill: string; edge: string }) {
+    return (
+        <>
+            <rect {...FAR} y="80" height="100" fill={fill} />
+            <rect {...FAR} y="80" height="1.6" fill={edge} />
+        </>
     )
 }
 
@@ -65,7 +80,7 @@ function WanoScene({ active }: SceneProps) {
     return (
         <>
             <Sky id="sky-wano" from="#7f1d1d" to="#f59e0b" />
-            <motion.rect width="160" height="90" fill="#fafafa" initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ duration: 0.5 }} />
+            <motion.rect {...FAR} y="-90" height="270" fill="#fafafa" initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ duration: 0.5 }} />
             <motion.circle cx="128" cy="24" r="10" initial={false} animate={{ fill: active ? '#111111' : '#fde68a' }} />
             <motion.path d="M10 74 L 60 36 L 110 74 Z" opacity="0.8" initial={false} animate={{ fill: active ? '#e5e5e5' : '#450a0a' }} />
             <motion.path d="M70 74 L 120 44 L 160 74 Z" opacity="0.6" initial={false} animate={{ fill: active ? '#d4d4d4' : '#450a0a' }} />
@@ -79,9 +94,6 @@ function WanoScene({ active }: SceneProps) {
                 <motion.rect x="46" y="31" width="68" height="6" rx="1" initial={false} animate={{ fill: ink }} />
                 <motion.rect x="52" y="44" width="56" height="4" initial={false} animate={{ fill: ink }} />
             </motion.g>
-            <motion.text x="8" y="17" fontSize="9" fontWeight="900" fill="#111111" fontFamily="ui-sans-serif, system-ui" initial={false} animate={{ opacity: active ? 1 : 0 }} transition={{ delay: 0.3 }}>
-                GEAR 5
-            </motion.text>
             <Sea fast={active} />
         </>
     )
@@ -101,6 +113,8 @@ function MarinefordScene({ active }: SceneProps) {
                 <motion.path d="M80 28 V 14 L 94 18.5 L 80 23 Z" fill="#f8fafc" animate={{ skewY: [0, 4, 0, -4, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }} />
             </motion.g>
             <Sea fast={active} />
+            {/* the bay Aokiji froze: the battlefield */}
+            <Ground fill="#bfdbfe" edge="#f8fafc" />
             {CRACKS.map((d, i) => (
                 <motion.path key={d} d={d} fill="none" stroke="#f8fafc" strokeWidth="1.5" strokeLinejoin="round" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ duration: 0.6, delay: active ? 0.2 + i * 0.15 : 0, ease: 'easeOut' }} />
             ))}
@@ -134,15 +148,19 @@ function EniesScene({ active }: SceneProps) {
                 <rect x="98" y="26" width="36" height="44" fill="#1e293b" />
             </motion.g>
             <Sea fast={active} />
+            {/* the Bridge of Hesitation */}
+            <Ground fill="#64748b" edge="#cbd5e1" />
         </>
     )
 }
 
 // Alabasta: Crocodile's sandstorm hides the kingdom until the Log Pose locks on; then the crew's X appears.
-const GRAINS = Array.from({ length: 26 }, (_, i) => {
+// Each grain blows 240 units to the right from a start spread over the whole stage width.
+const GRAINS = Array.from({ length: 70 }, (_, i) => {
     const r = makeRand(i + 3)
-    return { y: 8 + r() * 62, len: 4 + r() * 9, dur: 1.1 + r() * 1.4, delay: r() * 1.5 }
+    return { x: -400 + r() * 800, y: 4 + r() * 70, len: 4 + r() * 9, dur: 1.1 + r() * 1.4, delay: -r() * 2.5 }
 })
+const DUNES = `M-480 74 Q -440 64 -400 74${Array.from({ length: 13 }, (_, i) => ` T ${-320 + i * 80} 74`).join('')} V 82 H -480 Z`
 function AlabastaScene({ active }: SceneProps) {
     return (
         <>
@@ -151,18 +169,24 @@ function AlabastaScene({ active }: SceneProps) {
             <path d="M28 74 L 74 30 L 120 74 Z" fill="#78350f" />
             <path d="M74 30 L 120 74 L 96 74 Z" fill="#451a03" opacity="0.6" />
             <path d="M104 74 L 130 50 L 156 74 Z" fill="#92400e" />
-            <path d="M0 74 Q 40 64 80 74 T 160 74 V 80 H 0 Z" fill="#d97706" />
-            <motion.g initial={false} animate={{ opacity: active ? 0 : 1 }} transition={{ duration: 0.9 }}>
-                <rect width="160" height="90" fill="#d97706" opacity="0.45" />
-                {GRAINS.map((g, i) => (
-                    <motion.rect key={i} x={-20} y={g.y} width={g.len} height="1.6" rx="1" fill="#fde68a" opacity="0.9" animate={{ x: [0, 200] }} transition={{ duration: g.dur, delay: g.delay, repeat: Infinity, ease: 'linear' }} />
-                ))}
-            </motion.g>
+            <path d={DUNES} fill="#d97706" />
+            {/* Unmounted once it has cleared, so the grains stop looping when nobody can see them */}
+            <AnimatePresence initial={false}>
+                {!active && (
+                    <motion.g key="storm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}>
+                        <rect {...FAR} y="-90" height="270" fill="#d97706" opacity="0.45" />
+                        {/* CSS-animated: this many grains as script-driven loops would be a write per grain per frame */}
+                        {GRAINS.map((g, i) => (
+                            <rect key={i} x={g.x} y={g.y} width={g.len} height="1.6" rx="1" fill="#fde68a" opacity="0.9" style={{ animation: `grain ${g.dur}s linear ${g.delay}s infinite` }} />
+                        ))}
+                    </motion.g>
+                )}
+            </AnimatePresence>
             <g stroke="#fff7ed" strokeWidth="3" strokeLinecap="round" fill="none">
                 <motion.path d="M22 22 L 36 36" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ delay: active ? 0.7 : 0, duration: 0.25 }} />
                 <motion.path d="M36 22 L 22 36" initial={false} animate={{ pathLength: active ? 1 : 0, opacity: active ? 1 : 0 }} transition={{ delay: active ? 1.0 : 0, duration: 0.25 }} />
             </g>
-            <Sea fast={active} />
+            <Ground fill="#b45309" edge="#fbbf24" />
         </>
     )
 }
@@ -191,22 +215,24 @@ function EastBlueScene({ active }: SceneProps) {
                 <rect x="21.5" y="61" width="17" height="2.5" fill="#dc2626" />
             </motion.g>
             <Sea fast={active} />
+            {/* the shore of Arlong Park */}
+            <Ground fill="#3f6212" edge="#84cc16" />
         </>
     )
 }
 
 const ARCS: Arc[] = [
-    { id: 'wano', name: 'Wano Country', saga: 'Final Saga · Onigashima raid', moment: 'Gear 5: the Drums of Liberation', tie: 'Peak form. Leading the raid on the Compliance Hydra.', accent: '#fafafa', Scene: WanoScene },
-    { id: 'marineford', name: 'Marineford', saga: 'Summit War · Marine HQ', moment: '“The One Piece… is real!”', tie: 'One demo in front of HSBC that changed everything.', accent: '#cbd5e1', Scene: MarinefordScene },
-    { id: 'enies', name: 'Enies Lobby', saga: 'Water 7 Saga · Gates of Justice', moment: '“I want to live!” · the flag goes up in flames', tie: 'Declared war on manual scheduling. Won an award for it.', accent: '#38bdf8', Scene: EniesScene },
-    { id: 'alabasta', name: 'Alabasta', saga: 'Arabasta Saga · Desert Kingdom', moment: 'The X on every arm', tie: 'First real crew. Agile team, Java, JUnit, no shortcuts.', accent: '#fbbf24', Scene: AlabastaScene },
-    { id: 'eastblue', name: 'East Blue', saga: 'Romance Dawn · Foosha Village', moment: 'Shanks hands over the straw hat', tie: 'Where the voyage started: a two-month internship.', accent: '#dc2626', Scene: EastBlueScene },
+    { id: 'wano', name: 'Wano Country', saga: 'Final Saga · Onigashima raid', moment: 'Gear 5: the Drums of Liberation', tie: 'Peak form. Leading the raid on the Compliance Hydra.', accent: '#fafafa', sky: ['#7f1d1d', '#f59e0b'], Scene: WanoScene },
+    { id: 'marineford', name: 'Marineford', saga: 'Summit War · Marine HQ', moment: '“The One Piece… is real!”', tie: 'One demo in front of HSBC that changed everything.', accent: '#cbd5e1', sky: ['#0f172a', '#475569'], Scene: MarinefordScene },
+    { id: 'enies', name: 'Enies Lobby', saga: 'Water 7 Saga · Gates of Justice', moment: '“I want to live!” · the flag goes up in flames', tie: 'Declared war on manual scheduling. Won an award for it.', accent: '#38bdf8', sky: ['#0c4a6e', '#38bdf8'], Scene: EniesScene },
+    { id: 'alabasta', name: 'Alabasta', saga: 'Arabasta Saga · Desert Kingdom', moment: 'The X on every arm', tie: 'First real crew. Agile team, Java, JUnit, no shortcuts.', accent: '#fbbf24', sky: ['#9a3412', '#fbbf24'], Scene: AlabastaScene },
+    { id: 'eastblue', name: 'East Blue', saga: 'Romance Dawn · Foosha Village', moment: 'Shanks hands over the straw hat', tie: 'Where the voyage started: a two-month internship.', accent: '#dc2626', sky: ['#0369a1', '#7dd3fc'], Scene: EastBlueScene },
 ]
 
 function Island({ arc, active, className }: { arc: Arc; active: boolean; className?: string }) {
     // Only the islands near the viewport animate. A display:none copy (the other breakpoint's) never intersects, so it never mounts.
     const ref = useRef<SVGSVGElement>(null)
-    const near = useInView(ref, { margin: '30% 0px' })
+    const near = useInView(ref, { margin: '10% 0px' })
     return (
         <svg ref={ref} viewBox="0 0 160 90" className={className ?? 'w-full h-auto block'} aria-hidden>
             {near && <arc.Scene active={active} />}
@@ -324,7 +350,6 @@ function EastBlueDecor() {
                     <line key={i} x1="400" y1="0" x2={-40 + i * 24} y2="300" stroke="#000" strokeWidth={i % 3 ? 0.6 : 1.4} />
                 ))}
             </svg>
-            <div className="absolute top-3 left-5 md:left-8 text-[10px] font-black uppercase tracking-[0.35em] text-black/70 border-b-2 border-black pb-0.5">Ch. 1 · Romance Dawn</div>
         </div>
     )
 }
@@ -332,31 +357,31 @@ function EastBlueDecor() {
 const THEMES: Record<string, Theme> = {
     wano: {
         card: 'rounded-2xl bg-[#1a0a0a] border-red-700/50 shadow-[0_0_40px_rgba(220,38,38,0.2)]',
-        title: 'text-red-50', sub: 'text-red-200/40', role: 'text-amber-300', label: 'text-red-200/40', strong: 'text-amber-100', text: 'text-red-50/80',
+        title: 'text-red-50', sub: 'text-red-200/70', role: 'text-amber-300', label: 'text-red-200/70', strong: 'text-amber-100', text: 'text-red-50/80',
         stars: 'text-amber-400', tag: 'bg-red-950/70 text-amber-200 border-red-600/40 rounded-sm', stamp: 'border-amber-400/70 text-amber-300', bullet: '❀', marker: 'text-pink-400', link: 'text-amber-300 hover:text-amber-200 border-amber-500/50',
         Decor: WanoDecor,
     },
     marineford: {
         card: 'rounded-2xl bg-[#0b1322] border-sky-300/30 shadow-[0_0_30px_rgba(56,189,248,0.12)]',
-        title: 'text-white', sub: 'text-sky-200/40', role: 'text-sky-300', label: 'text-sky-200/40', strong: 'text-sky-50', text: 'text-slate-200/80',
+        title: 'text-white', sub: 'text-sky-200/70', role: 'text-sky-300', label: 'text-sky-200/70', strong: 'text-sky-50', text: 'text-slate-200/80',
         stars: 'text-sky-300', tag: 'bg-sky-950/70 text-sky-200 border-sky-400/40 rounded-full', stamp: 'border-sky-300/70 text-sky-200', bullet: '⚓', marker: 'text-sky-400', link: 'text-sky-300 border-sky-400/50',
         Decor: MarinefordDecor,
     },
     enies: {
         card: 'rounded-md bg-[#07192a] border-cyan-400/30 shadow-[0_0_30px_rgba(34,211,238,0.12)]',
-        title: 'text-cyan-50', sub: 'text-cyan-200/40', role: 'text-cyan-300 font-mono', label: 'text-cyan-200/40', strong: 'text-cyan-50', text: 'text-cyan-50/80',
+        title: 'text-cyan-50', sub: 'text-cyan-200/70', role: 'text-cyan-300 font-mono', label: 'text-cyan-200/70', strong: 'text-cyan-50', text: 'text-cyan-50/80',
         stars: 'text-cyan-300', tag: 'bg-cyan-950/70 text-cyan-200 border-cyan-400/40 rounded-none font-mono', stamp: 'border-cyan-300/70 text-cyan-200', bullet: '§', marker: 'text-cyan-400', link: 'text-cyan-300 border-cyan-400/50',
         Decor: EniesDecor,
     },
     alabasta: {
         card: 'rounded-2xl bg-gradient-to-br from-[#2b1a0a] via-[#3a2410] to-[#1e1307] border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.12)]',
-        title: 'text-amber-50', sub: 'text-amber-200/40', role: 'text-amber-300', label: 'text-amber-200/40', strong: 'text-amber-50', text: 'text-amber-50/80',
+        title: 'text-amber-50', sub: 'text-amber-200/70', role: 'text-amber-300', label: 'text-amber-200/70', strong: 'text-amber-50', text: 'text-amber-50/80',
         stars: 'text-amber-400', tag: 'bg-amber-950/60 text-amber-200 border-amber-500/40 rounded-sm', stamp: 'border-amber-300/70 text-amber-200', bullet: '✕', marker: 'text-amber-400', link: 'text-amber-300 border-amber-500/50',
         Decor: AlabastaDecor,
     },
     eastblue: {
-        card: 'rounded-none bg-[#f4efe3] border-[3px] border-black shadow-[8px_8px_0_#000] pt-10 md:pt-12',
-        title: 'text-black', sub: 'text-black/50', role: 'text-black font-black', label: 'text-black/40', strong: 'text-black', text: 'text-black/80',
+        card: 'rounded-none bg-[#f4efe3] border-[3px] border-black shadow-[8px_8px_0_#000]',
+        title: 'text-black', sub: 'text-black/70', role: 'text-black font-black', label: 'text-black/60', strong: 'text-black', text: 'text-black/80',
         stars: 'text-black', tag: 'bg-black text-[#f4efe3] border-black rounded-none', stamp: 'border-black text-black', bullet: '★', marker: 'text-black', link: 'text-black border-black/50',
         Decor: EastBlueDecor,
     },
@@ -364,87 +389,131 @@ const THEMES: Record<string, Theme> = {
 
 type Job = (typeof resume.experience)[number]
 
-function JobCard({ job, arc, index, active }: { job: Job; arc: Arc; index: number; active: boolean }) {
+function JobCard({ job, arc, active, arcNo }: { job: Job; arc: Arc; active: boolean; arcNo: number }) {
     const t = THEMES[arc.id]
+    const header = (
+        <div className="max-w-[55vw] md:max-w-sm">
+            <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-white/60">
+                <span>Arc {String(arcNo).padStart(2, '0')}</span>
+                {active && <span className="hidden sm:inline animate-pulse" style={{ color: arc.accent }}>◉ Log Pose</span>}
+            </div>
+            <div className="text-base md:text-lg font-black text-white leading-tight">{arc.name}</div>
+            <div className="hidden sm:block text-[11px] italic text-white/70">{arc.moment}</div>
+        </div>
+    )
     return (
         <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-10%' }}
-            transition={{ delay: index * 0.1 + 0.1, type: 'spring', stiffness: 220, damping: 24 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 24 }}
             // Marineford only: Whitebeard's tremor when you hover the card
             whileHover={arc.id === 'marineford' ? { x: [0, -3, 3, -2, 2, 0], transition: { duration: 0.45 } } : undefined}
             className="pb-6 md:pb-12 pt-2 md:pt-6"
         >
-            <div className={clsx('relative overflow-hidden p-5 md:p-8 border transition-all duration-300 hover:brightness-110', t.card)}>
-                <t.Decor />
-                <div className="relative">
-                    {/* Mobile: island chip */}
-                    <div className={clsx('md:hidden mb-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 pl-2 pr-3 py-1 rounded-full border', arc.id === 'eastblue' ? 'border-black/30 bg-black/5' : 'border-white/10 bg-white/5')}>
-                        <Island arc={arc} active={active} className="w-14 h-8 rounded-md shrink-0 -ml-1" />
-                        <span className={clsx('text-xs font-bold', t.strong)}>{arc.name}</span>
-                        <span className={clsx('text-[11px] font-mono', t.sub)}>{job.start} – {job.end}</span>
-                    </div>
-                    <p className={clsx('md:hidden -mt-2 mb-4 text-[11px] italic', t.role)}>{arc.moment} <span className={clsx('not-italic', t.sub)}>· {arc.tie}</span></p>
-
-                    <div className="flex flex-col gap-1 mb-4">
-                        <h3 className={clsx('text-xl md:text-2xl font-bold transition-colors', t.title)}>
-                            {job.company} <span className={clsx('text-base font-normal', t.sub)}>· {job.location}</span>
-                        </h3>
-                        <div className={clsx('font-mono text-sm', t.role)}>{job.role}</div>
-                    </div>
-
-                    {/* Boss fight framing */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-sm">
-                        <span className={clsx('uppercase tracking-widest text-xs', t.label)}>Boss:</span>
-                        <span className={clsx('font-bold', t.strong)}>{job.boss.name}</span>
-                        <span className={clsx('tracking-[0.15em]', t.stars)} aria-label={`Difficulty ${job.boss.difficulty} of 5`}>
-                            {'★'.repeat(job.boss.difficulty)}<span className="opacity-25">{'★'.repeat(5 - job.boss.difficulty)}</span>
-                        </span>
-                        {job.end === 'Present' ? (
-                            <span className={clsx('ml-auto text-[10px] font-black tracking-widest px-2 py-0.5 rounded-sm border animate-pulse -rotate-3', t.stamp)}>IN PROGRESS</span>
-                        ) : (
-                            <span className={clsx('ml-auto text-[10px] font-black tracking-widest px-2 py-0.5 rounded-sm border-2 -rotate-6', t.stamp)}>CLEARED</span>
-                        )}
-                    </div>
-                    {job.client && (
-                        <p className={clsx('text-xs mb-4', t.sub)}>
-                            <span className={clsx('uppercase tracking-widest', t.label)}>Quest giver:</span> {job.client}
-                        </p>
+            <div className={clsx('relative overflow-hidden border transition-all duration-300', t.card)}>
+                {/* The island opens the card: Kaido's sky on Wano, a boss fight everywhere else */}
+                <div className={clsx('relative', arc.id === 'eastblue' ? 'border-b-[3px] border-black' : 'border-b border-white/10')}>
+                    {arc.id === 'wano' ? (
+                        <KaidoStage sky={arc.sky} header={header} island={<Island arc={arc} active={active} />} />
+                    ) : (
+                        <BossStage arcId={arc.id} maxHp={job.boss.difficulty * 2} sky={arc.sky} header={header} island={<Island arc={arc} active={active} />} />
                     )}
+                </div>
+                <div className="relative p-5 md:p-8">
+                    <t.Decor />
+                    {/* Wide screens: details and stack on the left, bullets on the right, so lines stay readable */}
+                    <div className="relative lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-12">
+                        <div className="lg:col-start-1 lg:row-start-1">
+                            <p className={clsx('mb-3 text-[11px] font-mono', t.sub)}>{job.start} – {job.end} · <span className="italic">{arc.tie}</span></p>
+                            <div className="flex flex-col gap-1 mb-4">
+                                <h3 className={clsx('text-xl md:text-2xl font-bold transition-colors', t.title)}>
+                                    {job.company} <span className={clsx('text-base font-normal', t.sub)}>· {job.location}</span>
+                                </h3>
+                                <div className={clsx('font-mono text-sm', t.role)}>{job.role}</div>
+                            </div>
 
-                    <ul className={clsx('text-[15px] md:text-base leading-relaxed mb-5 space-y-2', t.text)}>
-                        {job.bullets.map((bullet, bi) => (
-                            <li key={bullet} className="relative flex gap-2.5">
-                                <span className={clsx('shrink-0 select-none', t.marker)} aria-hidden>{t.bullet}</span>
-                                <span>{bullet}</span>
-                                {arc.id === 'enies' && (
-                                    // Poneglyph: each line stays sealed until Robin reads it as the card scrolls in
+                            {/* Boss fight framing */}
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 text-sm">
+                                <span className={clsx('uppercase tracking-widest text-xs', t.label)}>Boss:</span>
+                                <span className={clsx('font-bold', t.strong)}>{job.boss.name}</span>
+                                <span className={clsx('tracking-[0.15em]', t.stars)} aria-label={`Difficulty ${job.boss.difficulty} of 5`}>
+                                    {'★'.repeat(job.boss.difficulty)}<span className="opacity-25">{'★'.repeat(5 - job.boss.difficulty)}</span>
+                                </span>
+                                {job.end === 'Present' ? (
+                                    <span className={clsx('ml-auto text-[10px] font-black tracking-widest px-2 py-0.5 rounded-sm border animate-pulse -rotate-3', t.stamp)}>IN PROGRESS</span>
+                                ) : (
+                                    // Stamped onto the card as it scrolls in
                                     <motion.span
-                                        aria-hidden
-                                        className="absolute inset-y-0 left-6 right-0 rounded-sm origin-right bg-[repeating-linear-gradient(90deg,#0e7490_0_7px,#164e63_7px_14px)]"
-                                        initial={{ scaleX: 1 }}
-                                        whileInView={{ scaleX: 0 }}
+                                        initial={{ scale: 2.4, opacity: 0 }}
+                                        whileInView={{ scale: 1, opacity: 1 }}
                                         viewport={{ once: true, margin: '-15%' }}
-                                        transition={{ duration: 0.9, delay: 0.3 + bi * 0.18, ease: [0.22, 1, 0.36, 1] }}
-                                    />
+                                        transition={{ delay: 0.35, type: 'spring', stiffness: 420, damping: 20 }}
+                                        className={clsx('ml-auto text-[10px] font-black tracking-widest px-2 py-0.5 rounded-sm border-2 -rotate-6', t.stamp)}
+                                    >
+                                        CLEARED
+                                    </motion.span>
                                 )}
-                            </li>
-                        ))}
-                    </ul>
+                            </div>
+                            {job.client && (
+                                <p className={clsx('text-xs mb-4', t.sub)}>
+                                    <span className={clsx('uppercase tracking-widest', t.label)}>Quest giver:</span> {job.client}
+                                </p>
+                            )}
+                        </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        {job.stack.split(', ').map((tech) => (
-                            <span key={tech} title="Busoshoku: Armament Haki" className={clsx('text-xs font-bold px-3 py-1 border transition-all hover:bg-gradient-to-br hover:from-zinc-950 hover:via-zinc-700 hover:to-black hover:text-white hover:border-violet-500/60 hover:shadow-[0_0_12px_rgba(139,92,246,0.5)] cursor-default', t.tag)}>
-                                {tech}
-                            </span>
-                        ))}
+                        <ul className={clsx('text-[15px] md:text-base leading-relaxed mb-5 space-y-2 lg:mb-0 lg:col-start-2 lg:row-start-1 lg:row-span-2', t.text)}>
+                            {job.bullets.map((bullet, bi) => (
+                                <li key={bullet} className="relative flex gap-2.5">
+                                    <span className={clsx('shrink-0 select-none', t.marker)} aria-hidden>{t.bullet}</span>
+                                    <span>{bullet}</span>
+                                    {arc.id === 'enies' && (
+                                        // Poneglyph: each line stays sealed until Robin reads it as the card scrolls in
+                                        <motion.span
+                                            aria-hidden
+                                            className="absolute inset-y-0 left-6 right-0 rounded-sm origin-right bg-[repeating-linear-gradient(90deg,#0e7490_0_7px,#164e63_7px_14px)]"
+                                            initial={{ scaleX: 1 }}
+                                            whileInView={{ scaleX: 0 }}
+                                            viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+                                            transition={{ duration: 0.6, delay: 0.15 + bi * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                                        />
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+
+                        {job.award && (
+                            // The haul from this island: awards and recognition, set apart like the highlight on the PDF
+                            <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: '-10%' }}
+                                className={clsx('mb-5 flex gap-3 rounded-sm border-l-4 px-3 py-2 lg:mt-5 lg:mb-0 lg:col-start-2 lg:row-start-3', t.text)}
+                                style={{ borderColor: arc.accent, background: `${arc.accent}1f` }}
+                            >
+                                <span className="shrink-0 text-xl font-black leading-none" style={{ color: arc.accent }} aria-hidden>宝</span>
+                                <p className="text-sm leading-snug">
+                                    <span className={clsx('mr-2 text-[10px] font-black uppercase tracking-widest', t.label)}>Treasure claimed</span>
+                                    <span className="font-semibold">{job.award}</span>
+                                </p>
+                            </motion.div>
+                        )}
+
+                        <div className="lg:col-start-1 lg:row-start-2 lg:self-end">
+                            <div className="flex flex-wrap gap-2">
+                                {job.stack.split(', ').map((tech) => (
+                                    <span key={tech} title="Busoshoku: Armament Haki" className={clsx('text-xs font-bold px-3 py-1 border transition-all hover:bg-gradient-to-br hover:from-zinc-950 hover:via-zinc-700 hover:to-black hover:text-white hover:border-violet-500/60 hover:shadow-[0_0_12px_rgba(139,92,246,0.5)] cursor-default', t.tag)}>
+                                        {tech}
+                                    </span>
+                                ))}
+                            </div>
+                            {job.end === 'Present' && (
+                                <button type="button" onClick={() => haki.unleash()} className={clsx('mt-5 text-[11px] font-mono uppercase tracking-widest border-b border-dashed', t.link)}>
+                                    Release Haoshoku Haki ⚡
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    {job.end === 'Present' && (
-                        <button type="button" onClick={() => haki.unleash()} className={clsx('mt-5 text-[11px] font-mono uppercase tracking-widest border-b border-dashed', t.link)}>
-                            Release Haoshoku Haki ⚡
-                        </button>
-                    )}
                 </div>
             </div>
         </motion.div>
@@ -461,22 +530,26 @@ function timeskip(i: number) {
 
 function Timeskip({ from, to, study }: NonNullable<ReturnType<typeof timeskip>>) {
     return (
-        <div className="relative grid grid-cols-[auto_1fr] md:grid-cols-[200px_auto_1fr] gap-3 md:gap-12">
-            <div className="hidden md:block" />
+        <div className="relative grid grid-cols-[auto_1fr] gap-3 md:gap-8">
             <div className="relative flex flex-col items-center">
                 <div className="flex-grow w-px border-l border-dashed border-sky-400/40" />
                 <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rotate-45 bg-black border-2 border-sky-400 z-10" />
             </div>
-            <div className="my-4 md:my-6 px-4 py-3 rounded-lg border border-dashed border-sky-400/30 bg-sky-950/20">
+            <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-10%' }}
+                className="my-4 md:my-6 px-4 py-3 rounded-lg border border-dashed border-sky-400/30 bg-sky-950/20"
+            >
                 <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-sky-300/70">Timeskip · {from} – {to}</div>
                 {study ? (
                     <div className="mt-1 text-sm text-white/80">
-                        Training arc: <span className="font-bold text-white">{study.degree}</span>, {study.school}{study.note && <span className="text-white/50"> · {study.note}</span>}
+                        Training arc: <span className="font-bold text-white">{study.degree}</span>, {study.school}{study.note && <span className="text-white/65"> · {study.note}</span>}
                     </div>
                 ) : (
                     <div className="mt-1 text-sm text-white/60">Off the Grand Line.</div>
                 )}
-            </div>
+            </motion.div>
         </div>
     )
 }
@@ -486,12 +559,8 @@ const MERRY_UNTIL = ARCS.findIndex((a) => a.id === 'enies')
 
 function Ship({ kind }: { kind: 'merry' | 'sunny' }) {
     return (
-        <motion.svg
-            viewBox="0 0 40 40"
-            className="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)]"
-            animate={{ rotate: [-6, 6, -6] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        >
+        // Rocks with a CSS animation: that runs off the main thread, so the ship costs nothing while the rest of the page is read.
+        <svg viewBox="0 0 40 40" className="w-full h-full drop-shadow-[0_0_8px_rgba(56,189,248,0.6)] motion-safe:animate-[rock_3s_ease-in-out_infinite]">
             <line x1={20} y1={4} x2={20} y2={27} stroke="#78350f" strokeWidth={1.5} />
             <path d="M 20 5 L 33 9 L 20 13 Z" fill="#111" />
             <circle cx={25} cy={9} r={1.6} fill="#fff" />
@@ -515,7 +584,7 @@ function Ship({ kind }: { kind: 'merry' | 'sunny' }) {
                     <circle cx={35.6} cy={23.4} r={1} fill="none" stroke="#ca8a04" strokeWidth={0.7} />
                 </>
             )}
-        </motion.svg>
+        </svg>
     )
 }
 
@@ -523,7 +592,10 @@ export default function Experience() {
     // The ship sails down the timeline as you scroll through it; each job is an island on the voyage.
     const timeline = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({ target: timeline, offset: ['start center', 'end center'] })
-    const shipTop = useTransform(scrollYProgress, (v) => `${v * 100}%`)
+    // The ship glides after the scroll position instead of sticking to it. It and its wake move with transforms only,
+    // so sailing never forces a layout.
+    const voyage = useSpring(scrollYProgress, { stiffness: 140, damping: 26, mass: 0.5 })
+    const shipY = useTransform(voyage, (v) => `${(v - 1) * 100}%`)
     const count = resume.experience.length
     const [active, setActive] = useState(0)
     // Canon ship swap: the Merry sails up to Enies Lobby, the Sunny from Marineford on.
@@ -542,10 +614,12 @@ export default function Experience() {
 
     return (
         <section className="relative md:min-h-screen w-full flex items-center justify-center py-12 md:py-20 bg-transparent">
-            <div className="relative z-20 w-full max-w-[1000px] mx-auto px-5 sm:px-6 lg:px-12 flex flex-col items-center">
+            <div className="relative z-20 w-full max-w-[1280px] mx-auto px-5 sm:px-6 lg:px-12 flex flex-col items-center">
 
                 {/* Header */}
-                <div className="text-center mb-10 md:mb-20 space-y-4">
+                <div className="relative isolate text-center mb-10 md:mb-20 space-y-4">
+                    {/* 海賊王: King of the Pirates, the title Luffy is chasing */}
+                    <KanjiWatermark text="海賊王" color="#ef4444" className="left-0 top-0 md:left-1/2 md:-translate-x-[330%]" />
                     <svg viewBox="-100 -100 200 200" className="w-24 md:w-28 mx-auto" role="img" aria-label="Zoro's three swords: Appian, SQL, Integrations">
                         <defs>
                             <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
@@ -580,9 +654,13 @@ export default function Experience() {
                         transition={{ delay: 0.1 }}
                         className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-white"
                     >
-                        EXPERIENCE <span className="text-red-500">LOG</span>
+                        <span className="relative inline-block">
+                            EXPERIENCE <span className="text-red-500">LOG</span>
+                            {/* ドン: the sound effect Oda stamps on every big entrance */}
+                            <MangaSfx jp="ドン!" en="Don!" color="#facc15" tilt={-10} className="mx-auto mt-3 md:mt-0 md:absolute md:left-full md:ml-3 md:-top-6" />
+                        </span>
                     </motion.h2>
-                    <p className="font-mono text-xs tracking-widest uppercase text-white/40">
+                    <p className="font-mono text-xs tracking-widest uppercase text-white/65">
                         Santōryū: {SWORDS.map((s) => s.skill).join(' · ')}
                     </p>
                 </div>
@@ -590,10 +668,11 @@ export default function Experience() {
                 {/* Timeline */}
                 <div ref={timeline} className="relative w-full">
                     {/* Wake behind the ship, then the ship itself, centred on the timeline line */}
-                    <div className="absolute top-0 bottom-0 left-[0.5px] md:left-[248.5px] pointer-events-none z-20" aria-hidden>
-                        <motion.div style={{ height: shipTop }} className="absolute top-0 -translate-x-1/2 w-[2px] bg-gradient-to-b from-transparent to-sky-400/70" />
-                        <motion.div style={{ top: shipTop }} className="absolute -translate-x-1/2 -translate-y-1/2">
-                            <div className="relative w-7 h-7 md:w-10 md:h-10">
+                    <div className="absolute top-0 bottom-0 left-[0.5px] pointer-events-none z-20" aria-hidden>
+                        <motion.div style={{ scaleY: voyage }} className="absolute inset-y-0 -translate-x-1/2 w-[2px] origin-top will-change-transform bg-gradient-to-b from-transparent to-sky-400/70" />
+                        {/* A full-height rail, slid up by the distance still to sail: its bottom edge, and the ship on it, sit at the current position */}
+                        <motion.div style={{ y: shipY }} className="absolute inset-y-0 w-0 will-change-transform">
+                            <div className="absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-7 h-7 md:w-10 md:h-10">
                                 <AnimatePresence initial={false}>
                                     {merry ? (
                                         // Leaving Enies Lobby the Merry gets her Viking funeral: she burns and sinks.
@@ -620,7 +699,7 @@ export default function Experience() {
                                             initial={{ opacity: 0, x: 4 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0 }}
-                                            className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-2 whitespace-nowrap font-mono text-[10px] italic text-orange-300"
+                                            className="hidden md:block absolute right-full top-1/2 -translate-y-1/2 mr-2 whitespace-nowrap font-mono text-[10px] italic text-orange-300"
                                         >
                                             Thank you, Merry.
                                         </motion.span>
@@ -631,46 +710,22 @@ export default function Experience() {
                     </div>
                     {resume.experience.map((job, i) => { const skip = timeskip(i); return (
                         <Fragment key={job.company + job.start}>
-                        <div className="relative grid grid-cols-[auto_1fr] md:grid-cols-[200px_auto_1fr] gap-3 md:gap-12 group">
-
-                            {/* Left Column: the island this job was sailed to; the one nearest the ship is the Log Pose target */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 36, rotate: -4 }}
-                                whileInView={{ opacity: 1, y: 0, rotate: i % 2 ? 1.5 : -1.5 }}
-                                viewport={{ once: true, margin: '-10%' }}
-                                transition={{ delay: i * 0.08, type: 'spring', stiffness: 180, damping: 18 }}
-                                className="hidden md:block self-start mt-6 ml-auto w-[180px]"
-                            >
-                                <motion.div
-                                    animate={active === i ? { y: [0, -5, 0] } : { y: 0 }}
-                                    transition={active === i ? { duration: 3, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
-                                    style={active === i ? { borderColor: ARCS[i].accent, boxShadow: `0 0 32px ${ARCS[i].accent}55` } : undefined}
-                                    className={clsx('rounded-xl overflow-hidden border bg-zinc-950/80 transition-[box-shadow,border-color,transform] duration-500', active === i ? 'scale-[1.04]' : 'border-white/10 shadow-xl shadow-black/60')}
-                                >
-                                    <Island arc={ARCS[i]} active={active === i} />
-                                    <div className="p-3 space-y-1">
-                                        <div className="flex items-center justify-between text-[9px] font-mono uppercase tracking-[0.2em] text-white/40">
-                                            <span>Arc {String(count - i).padStart(2, '0')}</span>
-                                            {active === i && <span className="animate-pulse" style={{ color: ARCS[i].accent }}>◉ Log Pose</span>}
-                                        </div>
-                                        <div className="text-sm font-black text-white leading-tight">{ARCS[i].name}</div>
-                                        <div className="text-[10px] text-white/50 leading-snug">{ARCS[i].saga}</div>
-                                        <div className="pt-1.5 text-[11px] italic leading-snug" style={{ color: active === i ? ARCS[i].accent : 'rgba(186,230,253,0.85)' }}>{ARCS[i].moment}</div>
-                                        <div className="text-[9.5px] text-white/35 leading-snug">{ARCS[i].tie}</div>
-                                        <div className="pt-1 text-[10px] font-mono text-white/40">{job.start} – {job.end}</div>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-
+                        <div className="relative grid grid-cols-[auto_1fr] gap-3 md:gap-8 group">
                             {/* Center Column: Line & Node */}
                             <div className="relative flex flex-col items-center">
                                 <div className="flex-grow w-px bg-white/10 group-hover:bg-red-500/50 transition-colors duration-500" />
-                                <div className="absolute top-8 w-3 h-3 rounded-full bg-black border-2 border-red-500 group-hover:scale-125 transition-transform duration-300 z-10" />
+                                {/* The node locks on, in the island's colour, while the Log Pose points at this job */}
+                                <div
+                                    className={clsx('absolute top-8 w-3 h-3 rounded-full border-2 group-hover:scale-125 transition-all duration-300 z-10', active === i ? 'scale-125' : 'bg-black border-red-500')}
+                                    style={active === i ? { background: ARCS[i].accent, borderColor: ARCS[i].accent, boxShadow: `0 0 12px ${ARCS[i].accent}` } : undefined}
+                                >
+                                    {active === i && <span className="absolute -inset-1 rounded-full border motion-safe:animate-ping" style={{ borderColor: ARCS[i].accent }} />}
+                                </div>
                                 <div className="flex-grow w-px bg-white/10 group-hover:bg-red-500/50 transition-colors duration-500" />
                             </div>
 
                             {/* Right Column: the job card, dressed as its island */}
-                            <JobCard job={job} arc={ARCS[i]} index={i} active={active === i} />
+                            <JobCard job={job} arc={ARCS[i]} active={active === i} arcNo={count - i} />
                         </div>
                         {skip && <Timeskip {...skip} />}
                         </Fragment>

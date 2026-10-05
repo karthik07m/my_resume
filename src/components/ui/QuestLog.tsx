@@ -15,7 +15,8 @@ const QUESTS: { id: string; name: string }[] = [
 
 type Toast = { id: number; kicker: string; text: string }
 
-// XP bar across the top that fills with scroll, plus "quest unlocked" toasts when each section is reached.
+// Progress bar across the top that fills with scroll, plus a small toast when each section is reached.
+// Plain on purpose: it sits over every franchise on the page, so it does not borrow the look of any one of them.
 export default function QuestLog() {
     const { scrollYProgress } = useScroll()
     const [unlocked, setUnlocked] = useState(0)
@@ -33,10 +34,10 @@ export default function QuestLog() {
                     setUnlocked(count)
                     const quest = QUESTS.find((q) => q.id === id)
                     const toast: Toast[] = quest && id !== 'hero'
-                        ? [{ id: count * 2, kicker: `[SYSTEM] Quest unlocked · LV ${count}`, text: quest.name }]
+                        ? [{ id: count * 2, kicker: `Section ${count} of ${QUESTS.length}`, text: quest.name }]
                         : []
                     if (count === QUESTS.length) {
-                        toast.push({ id: count * 2 + 1, kicker: '[SYSTEM] Achievement', text: 'Phantom Sixth Man: you saw everything 🏆' })
+                        toast.push({ id: count * 2 + 1, kicker: 'Complete', text: 'You saw everything 🏆' })
                     }
                     if (toast.length) { setToasts((t) => [...t, ...toast].slice(-2)); sfx.levelUp() }
                 }
@@ -70,8 +71,8 @@ export default function QuestLog() {
             </div>
 
             {/* Level badge */}
-            <div className="fixed bottom-4 right-4 z-[60] px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-green-500/30 font-mono text-[11px] text-green-400 tracking-widest pointer-events-none">
-                PLAYER LV {unlocked}/{QUESTS.length}
+            <div className="fixed bottom-4 right-4 z-[60] px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-white/15 font-mono text-[11px] text-white/60 tracking-widest pointer-events-none">
+                {unlocked} / {QUESTS.length} explored
             </div>
 
             {/* Toasts */}
@@ -86,12 +87,9 @@ export default function QuestLog() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-                            className="relative max-w-[18rem] px-4 py-2 rounded-md bg-blue-950/90 border border-blue-400/50 shadow-lg shadow-blue-500/20 backdrop-blur text-left"
+                            className="max-w-[18rem] px-4 py-2 rounded-md bg-zinc-900/90 border border-white/15 shadow-lg backdrop-blur text-left"
                         >
-                            {['top-1 left-1 border-t-2 border-l-2', 'top-1 right-1 border-t-2 border-r-2', 'bottom-1 left-1 border-b-2 border-l-2', 'bottom-1 right-1 border-b-2 border-r-2'].map((c) => (
-                                    <span key={c} aria-hidden className={`absolute w-3 h-3 border-blue-400/80 ${c}`} />
-                                ))}
-                            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">{toast.kicker}</div>
+                            <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/50">{toast.kicker}</div>
                             <div className="text-xs sm:text-sm font-bold text-white">{toast.text}</div>
                         </motion.div>
                     ))}

@@ -1,8 +1,7 @@
 'use client'
 
 import { MotionConfig } from 'framer-motion'
-import { Stars } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
+import dynamic from 'next/dynamic'
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
 import Experience from '@/components/sections/Experience'
@@ -17,6 +16,9 @@ import SoundToggle from '@/components/ui/SoundToggle'
 import CursorTrail from '@/components/effects/CursorTrail'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
+// Loaded after the page is interactive, for the same reason as the hero's 3D shape.
+const StarField = dynamic(() => import('@/components/canvas/StarField'), { ssr: false })
+
 export default function Home() {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const hasMouse = useMediaQuery('(pointer: fine)')
@@ -25,10 +27,7 @@ export default function Home() {
       <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
         {/* Background Stars */}
         <div className="fixed inset-0 z-0 pointer-events-none sage-shift" aria-hidden>
-          {/* frameloop="demand": the stars render once and never again, instead of a full WebGL frame every 16ms for the whole visit */}
-          <Canvas camera={{ position: [0, 0, 1] }} dpr={[1, 1.5]} frameloop="demand">
-            <Stars radius={100} depth={50} count={isDesktop ? 4000 : 1200} factor={4} saturation={0} fade speed={0} />
-          </Canvas>
+          <StarField count={isDesktop ? 4000 : 1200} />
         </div>
 
         <Loader />
@@ -39,7 +38,9 @@ export default function Home() {
         <SoundToggle />
         {hasMouse && <CursorTrail />}
 
-        <div className="relative z-10 sage-shift haki-shake">
+        {/* No Sage Mode tint on the content: every section below has its own palette (the One Piece arcs most of all),
+            and turning their hues made them the wrong colours. The hero recolours itself; see Hero.tsx. */}
+        <div className="relative z-10 haki-shake">
           <div id="hero"><Hero /></div>
           <div id="about"><About /></div>
           <div id="experience"><Experience /></div>

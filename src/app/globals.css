@@ -84,7 +84,9 @@ body {
   background: var(--neon-blue);
 }
 
-/* Sage Mode (Konami code / type "sage" / tap the hero badge 3x): shift the whole palette to orange and gold. */
+/* Sage Mode: the green chrome (the nav's Résumé button, the stars layer) turns to orange and gold. */
+/* Only for things that are green. The sections have palettes of their own, and turning their hues made them the */
+/* wrong colours, so the page content is never given this class; the hero recolours itself (sections/Hero.tsx). */
 html[data-sage] .sage-shift {
   filter: hue-rotate(-120deg) saturate(1.25);
   transition: filter 0.6s ease;
@@ -100,4 +102,77 @@ html[data-haki] .haki-shake {
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-haki] .haki-shake { animation: none; }
+}
+
+/* Loading splash (ui/Loader.tsx): the bar fills in CSS, so it moves before any script has loaded. */
+@keyframes loader-fill {
+  from { transform: scaleX(0); }
+}
+
+/* Hero: the typing cursor. */
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* About: the watching eyes blink. The lid is shut only for a moment near the end of each cycle. */
+@keyframes blink-lid {
+  0%, 93%, 100% { transform: scaleY(0); }
+  96.5% { transform: scaleY(1); }
+}
+
+/* About (sections/Kurama.tsx): a Nine-Tails tail swaying from its root, Kurama blinking, and chakra bubbles rising
+   through the section. */
+@keyframes tail-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+@keyframes kurama-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes chakra-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-85vh) scale(1.1); opacity: 0; }
+}
+
+/* Experience timeline: the ship rocking on its way down. */
+@keyframes rock {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+/* Experience, Alabasta: one grain of the sandstorm blowing across the stage (px are the scene's own units). */
+@keyframes grain {
+  0% { transform: translateX(0); opacity: 0; }
+  15%, 85% { opacity: 0.9; }
+  100% { transform: translateX(240px); opacity: 0; }
+}
+
+/* Ki aura behind the hero name (effects/KiAura.tsx): three flame frames shown one at a time, so it flickers like cel animation. */
+/* --charge runs 0..1 while the scouter is held (ui/Scouter.tsx); --aura-rest is how bright the aura sits when idle. */
+.ki-aura {
+  opacity: calc(var(--aura-rest, 0.4) + var(--charge, 0) * (1 - var(--aura-rest, 0.4)));
+  transform: scale(calc(1 + var(--charge, 0) * 0.12), calc(1 + var(--charge, 0) * 0.45));
+  transform-origin: 50% 100%;
+  filter: blur(2px) drop-shadow(0 0 16px var(--aura));
+  mix-blend-mode: screen;
+}
+.ki-aura g { opacity: 0; animation: ki-frame 0.36s steps(1) infinite; }
+.ki-aura polyline { animation: ki-bolt 0.9s steps(1) infinite; }
+@keyframes ki-frame {
+  0% { opacity: 1; }
+  33.4%, 100% { opacity: 0; }
+}
+@keyframes ki-bolt {
+  0%, 20% { opacity: 1; }
+  10%, 30%, 100% { opacity: 0; }
+}
+/* The name trembles while the scouter is charging. */
+[data-charging] .ki-shake {
+  animation: shake 0.3s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ki-aura g, .ki-aura polyline, [data-charging] .ki-shake { animation: none; }
+  .ki-aura g:first-of-type { opacity: 1; }
 }

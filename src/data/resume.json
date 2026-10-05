@@ -1,7 +1,7 @@
 {
     "name": "Mani Karthik Bollimuntha",
-    "title": "Senior Lead Appian Developer",
-    "tagline": "7+ years in Appian development, building process automation for federal, banking, and pharma clients. Appian Level 2 Certified.",
+    "title": "Senior Appian Developer",
+    "tagline": "7+ years building scalable Appian applications, now with Appian AI, for federal, banking, and pharma clients. Appian Level 2 Certified, with light full-stack and Flutter on the side.",
     "location": "Herndon, VA",
     "email": "manikarthik@live.com",
     "resumeFile": "Mani_Karthik_Resume.pdf",
@@ -11,21 +11,23 @@
         "linkedin": "https://www.linkedin.com/in/mani-karthik-bollimuntha-b30268b7/"
     },
     "about": [
-        "I build enterprise Appian applications: process models, SAIL interfaces, records, CDTs, and REST/SOAP integrations, backed by MySQL and SQL Server work that I tune myself.",
-        "Most of the last three years has been on a federal compliance and funding platform for USAC, where I also set up the team's code-review standard and mentor junior developers. Before that: loan onboarding for HSBC and a scheduling and audit platform for IQVIA.",
-        "Outside client work I ship my own products, including a visa-guide app with over a thousand installs and an Appian interview-practice site."
+        "I architect and deliver enterprise-grade Appian applications across the core platform: SAIL, Appian AI, process models, expression rules, records, CDTs, and Connected Systems integrations, backed by MySQL and SQL Server work that I tune myself.",
+        "Since 2023 I have been on a federal compliance and funding platform for USAC, where I drive performance tuning, establish design patterns, lead code reviews, and mentor junior developers. Before that: loan onboarding for HSBC and a scheduling and audit platform for IQVIA.",
+        "React, Java, and Flutter are my complementary tools: I use them for side projects and integrations, including a visa-guide app with over a thousand installs and an Appian interview-practice site."
     ],
     "skills": [
         {
             "group": "Appian",
             "items": [
+                "Appian AI",
                 "Process Models",
                 "SAIL Interfaces",
+                "Expression Rules",
                 "Record Types",
                 "CDTs",
                 "Connected Systems",
                 "REST / SOAP Integrations",
-                "Expression & Decision Rules",
+                "Decision Rules",
                 "Security (Groups / RBAC)",
                 "Versions 18 through 26"
             ]
@@ -37,14 +39,16 @@
                 "Stored Procedures",
                 "Triggers",
                 "Index Optimization",
-                "SQL Server"
+                "SQL Server",
+                "Supabase",
+                "NoSQL (basic)"
             ]
         },
         {
-            "group": "Languages",
+            "group": "Full-Stack & Mobile",
             "items": [
+                "React",
                 "Java",
-                "SQL",
                 "JavaScript",
                 "Dart / Flutter"
             ]
@@ -54,32 +58,43 @@
             "items": [
                 "AWS",
                 "Firebase",
-                "Supabase",
+                "Vercel",
+                "Cloudflare",
                 "Git",
-                "JIRA"
+                "JIRA",
+                "Claude AI",
+                "Codex AI"
             ]
         }
     ],
     "experience": [
         {
             "company": "iLabs Inc",
-            "role": "Senior Lead Appian Developer",
+            "role": "Senior Appian Developer",
             "start": "Jan 2023",
             "end": "Present",
             "location": "United States",
             "client": "USAC (Universal Service Administrative Co.), federal compliance and funding platform",
             "stack": "Appian 23 to 26, MySQL, AWS",
             "bullets": [
-                "Develop and enhance the Funding Forms that carriers use to stay compliant across funding cycles.",
-                "Replaced ad-hoc HTTP calls with REST integrations through Appian Connected Systems against USAC's internal validation APIs, centralizing credential management.",
-                "Wrote the team's code-review framework covering SAIL practices, CDT reuse, rule naming, and security roles. It is now the standard applied to every user story.",
-                "Optimize MySQL stored procedures for validation, retrieval, and multi-table writes.",
-                "Mentor two junior Appian developers and sit on technical hiring interviews, where I defined the developer evaluation criteria."
+                "Design and build performant Appian applications for complex federal compliance cases, keeping the Funding Form workflows fast and easy to use.",
+                "Work across the full lifecycle with SAIL, process models, expression rules, records, and CDTs, from database design to user experience.",
+                "Optimize MySQL stored procedures and data models for multi-table validation, retrieval, and inserts.",
+                "Contribute to performance analysis and system tuning, finding and fixing bottlenecks in process execution and SAIL load times.",
+                "Built reusable REST integrations through Appian Connected Systems against USAC's internal validation APIs.",
+                "Break down stories, define acceptance criteria, and support technical feature design each sprint.",
+                "Review peers' code and set the team's review standard for SAIL practices, CDT reuse, and security roles.",
+                "Troubleshoot emergent issues, ship bug fixes, and deploy features to higher environments.",
+                "Use Appian AI Document Classification and Document Extraction to process compliance forms, improving extraction accuracy and processing speed.",
+                "Plan new applications and speed up technical feature design with Appian AI Composer.",
+                "Generate test cases for critical expression rules with Appian AI, raising coverage and rule reliability.",
+                "Mentor two junior Appian developers on platform standards and review practices."
             ],
             "boss": {
                 "name": "The Federal Compliance Hydra",
                 "difficulty": 5
-            }
+            },
+            "award": "Conducted technical interviews and refined the evaluation standards that help scale the iLabs engineering team."
         },
         {
             "company": "Yexle Limited",
@@ -91,15 +106,16 @@
             "stack": "Appian 20 to 21, REST APIs, AI integration",
             "bullets": [
                 "Built and demoed the proof of concept for the loan onboarding application to HSBC stakeholders, which helped secure the engagement.",
-                "Designed risk-assessment process models with conditional branching that tiered applicants into low, medium, or high risk.",
+                "Designed a reusable risk-assessment application on process models with conditional branching that tiers applicants into low, medium, or high risk.",
                 "Integrated AI APIs into Appian through REST Connected Systems.",
-                "Cut query time on the onboarding modules by about 25% through index optimization and removing redundant calls in expression rules.",
-                "Managed deployments across Dev, SFT, and Pre-Prod environments."
+                "Troubleshot application issues and managed deployments across Dev, SFT, and Pre-Prod, coordinating with several teams.",
+                "Cut query time on the onboarding modules by about 25% through index optimization and removing redundant calls in expression rules."
             ],
             "boss": {
                 "name": "HSBC Loan Onboarding",
                 "difficulty": 4
-            }
+            },
+            "award": null
         },
         {
             "company": "Hexaware Technologies",
@@ -110,16 +126,17 @@
             "client": "IQVIA, meeting scheduler and audit log platform",
             "stack": "Appian 18 to 20, SQL Server, REST / SOAP",
             "bullets": [
-                "Designed and built a meeting scheduler with a task scheduler across GDMPM projects and an audit log tracking every scheduling action.",
-                "Built process models with parallel approval gateways and decision rules that automated scheduling logic and participant notifications.",
-                "Wrote SAIL rules for date and time conflict resolution, and admin interfaces with role-based access and conditional rendering.",
-                "Created SQL Server triggers and stored procedures for the audit trail.",
-                "Received a company award for an AI chat integration inside Appian, and placed first in Hexaware's full-stack training."
+                "Designed and built a meeting scheduler with a task scheduler and an audit log module across GDMPM projects.",
+                "Built process models with parallel approval gateways and conditional paths that automated scheduling, conflict detection, and participant notifications.",
+                "Wrote SAIL expression rules for date and time conflict resolution, and admin interfaces with role-based access and conditional rendering.",
+                "Created SQL Server triggers and stored procedures for a compliance-grade audit trail.",
+                "Ran regular demos with business analysts to validate requirements and refine features."
             ],
             "boss": {
                 "name": "IQVIA Scheduling Labyrinth",
                 "difficulty": 4
-            }
+            },
+            "award": "Company award for an AI chat integration inside Appian, and first place in Hexaware's full-stack development training."
         },
         {
             "company": "Hebeon Technologies",
@@ -130,13 +147,14 @@
             "client": null,
             "stack": "Java, REST / SOAP, MySQL, JUnit",
             "bullets": [
-                "Designed and maintained Java web applications in an Agile team.",
-                "Developed RESTful and SOAP web services, wrote MySQL queries, and covered the code with JUnit tests."
+                "Designed and built Java web applications in an Agile team, using object-oriented design to keep them maintainable.",
+                "Developed RESTful and SOAP web services, wrote optimized MySQL queries, and covered the code with JUnit tests."
             ],
             "boss": {
                 "name": "The Java Grind",
                 "difficulty": 2
-            }
+            },
+            "award": null
         },
         {
             "company": "Web Synergies",
@@ -147,12 +165,14 @@
             "client": null,
             "stack": "Cordova",
             "bullets": [
-                "Added price sorting and third-party payment gateway integration to an e-commerce mobile app."
+                "Added price sorting and third-party payment gateway integration to an e-commerce mobile app.",
+                "Proposed new app concepts and helped the core team build them."
             ],
             "boss": {
                 "name": "Tutorial: Cordova Cave",
                 "difficulty": 1
-            }
+            },
+            "award": null
         }
     ],
     "projects": [
@@ -160,7 +180,7 @@
             "name": "Visa Sage",
             "kind": "Android app, Flutter and Firebase",
             "year": "2022",
-            "description": "A Flutter guide to US F1 visa requirements and procedures. Firebase handles auth and live updates. Over a thousand installs and still maintained.",
+            "description": "A Flutter guide to US F1 visa requirements and procedures, with an AI mock visa interview. Firebase handles auth and live updates. Over a thousand installs and still maintained.",
             "url": "https://play.google.com/store/apps/details?id=com.manikarthik.visasage",
             "linkLabel": "Google Play"
         },
@@ -168,7 +188,7 @@
             "name": "Appian Verse",
             "kind": "Web app, React, Supabase, Vercel",
             "year": "2025",
-            "description": "Practice site for Appian interview questions. Built with AI assistance to move fast; Cloudflare in front for the domain and security.",
+            "description": "Full-stack practice site for Appian interviews: React front end, Supabase backend, Vercel hosting, Cloudflare for domain and security. Its AI mock interviewer runs on RAG over vector search in Supabase, with Claude asking the questions.",
             "url": "https://appianverse.com",
             "linkLabel": "appianverse.com"
         },
@@ -182,11 +202,11 @@
         },
         {
             "name": "Dotkin",
-            "kind": "Desktop app, Electron, macOS / Windows / Linux",
+            "kind": "Desktop app, Electron and JavaScript",
             "year": "2026",
-            "description": "A free, MIT-licensed focus tracker: timed 10 to 45 minute blocks, a morning planner, a floating desktop companion called DOT, and optional Claude coaching that reads your own log. Everything lives in one plain file on your machine.",
-            "url": "https://karthik07m.github.io/dotkin/",
-            "linkLabel": "karthik07m.github.io/dotkin"
+            "description": "An AI-coached focus tracker for macOS, Windows and Linux. The Claude API reads your own log to give personalized coaching and automated focus briefings, around timed 10 to 45 minute blocks and a floating desktop companion called DOT.",
+            "url": "https://karthik07m.github.io/dotkin-site/",
+            "linkLabel": "karthik07m.github.io/dotkin-site"
         }
     ],
     "education": [
@@ -204,6 +224,7 @@
         }
     ],
     "certifications": [
-        "Appian Level 2 Certified Developer"
+        "Appian Level 2 Certified Developer",
+        "Google AI"
     ]
 }

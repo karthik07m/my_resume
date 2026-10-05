@@ -6,31 +6,34 @@ import { motion, AnimatePresence } from 'framer-motion'
 const MIN_MS = 700
 const MAX_MS = 1500
 
-// One line per franchise on the site, cycled while the page loads.
+// One line per franchise on the site, in page order, cycled while the page loads.
 const LINES = [
+    'Raising power level…',
     'Gathering chakra…',
-    'Weaving hand seals…',
     'Sharpening Wado Ichimonji…',
-    'Entering the Zone…',
     '[SYSTEM] Loading Player data…',
     'Total Concentration Breathing…',
-    'Mangekyō awakening…',
 ]
 
-// Sharingan splash that covers the first paint while fonts, the star field and the 3D scene load.
+// The four stars on Goku's Dragon Ball, as a diamond.
+const STAR = 'M0,-7 L1.7,-2.3 L6.7,-2.2 L2.7,0.9 L4.1,5.7 L0,2.8 L-4.1,5.7 L-2.7,0.9 L-6.7,-2.2 L-1.7,-2.3 Z'
+const STARS = [[0, -10], [10, 0], [0, 10], [-10, 0]]
+
+// Dragon Ball splash that covers the first paint while fonts, the star field and the 3D scene load.
+// It opens onto the hero, which is Dragon Ball's.
 export default function Loader() {
     const [done, setDone] = useState(false)
     const [line, setLine] = useState(0)
 
     useEffect(() => {
-        const start = performance.now()
+        // Both limits count from navigation start (where performance.now() is 0), not from hydration:
+        // the splash is in the HTML, so it has usually been on screen long enough by the time this runs.
+        const closeAt = (ms: number) => setTimeout(() => setDone(true), Math.max(0, ms - performance.now()))
         let finishTimer: ReturnType<typeof setTimeout> | undefined
-        const finish = () => {
-            finishTimer = setTimeout(() => setDone(true), Math.max(0, MIN_MS - (performance.now() - start)))
-        }
+        const finish = () => { finishTimer = closeAt(MIN_MS) }
         if (document.readyState === 'complete') finish()
         else window.addEventListener('load', finish, { once: true })
-        const cap = setTimeout(() => setDone(true), MAX_MS)
+        const cap = closeAt(MAX_MS)
         const cycle = setInterval(() => setLine((l) => (l + 1) % LINES.length), 380)
         return () => {
             window.removeEventListener('load', finish)
@@ -49,26 +52,24 @@ export default function Loader() {
                     aria-busy="true"
                     aria-label="Loading"
                 >
-                    {/* Sharingan: red iris, three tomoe spinning, faster as the bar fills */}
-                    <div className="relative w-20 h-20 rounded-full bg-red-600 border-4 border-black shadow-[0_0_30px_rgba(239,68,68,0.7),inset_0_0_12px_rgba(0,0,0,0.6)]" aria-hidden>
-                        <div className="absolute inset-0 rounded-full border-2 border-black/60" />
-                        <motion.div
-                            className="absolute inset-0"
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
-                        >
-                            {[0, 120, 240].map((deg) => (
-                                <span
-                                    key={deg}
-                                    className="absolute left-1/2 top-1/2 w-3.5 h-3.5 -ml-[7px] -mt-[7px] rounded-full bg-black"
-                                    style={{ transform: `rotate(${deg}deg) translateY(-22px)` }}
-                                />
-                            ))}
-                        </motion.div>
-                        <div className="absolute left-1/2 top-1/2 w-5 h-5 -ml-2.5 -mt-2.5 rounded-full bg-black" />
+                    {/* The four-star ball. Its glow pulses in CSS, so it moves before the scripts arrive. */}
+                    <div className="relative w-20 h-20" aria-hidden>
+                        <div className="absolute inset-0 rounded-full motion-safe:animate-pulse shadow-[0_0_36px_rgba(249,115,22,0.85)]" />
+                        <svg viewBox="-32 -32 64 64" className="relative w-full h-full">
+                            <defs>
+                                <radialGradient id="loader-ball" cx="36%" cy="30%" r="80%">
+                                    <stop offset="0" stopColor="#fef3c7" />
+                                    <stop offset="0.35" stopColor="#fb923c" />
+                                    <stop offset="1" stopColor="#c2410c" />
+                                </radialGradient>
+                            </defs>
+                            <circle r="30" fill="url(#loader-ball)" stroke="#7c2d12" strokeWidth="1.5" />
+                            {STARS.map(([x, y]) => <path key={`${x}${y}`} d={STAR} transform={`translate(${x} ${y})`} fill="#dc2626" />)}
+                            <ellipse cx="-11" cy="-15" rx="8" ry="4.5" fill="#fff" opacity="0.45" transform="rotate(-30 -11 -15)" />
+                        </svg>
                     </div>
 
-                    <div className="h-5 font-mono text-xs sm:text-sm tracking-[0.4em] uppercase text-red-300">
+                    <div className="h-5 font-mono text-xs sm:text-sm tracking-[0.4em] uppercase text-orange-300">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={line}
@@ -83,13 +84,7 @@ export default function Loader() {
                     </div>
 
                     <div className="w-full max-w-xs h-1 bg-white/10 overflow-hidden rounded-full">
-                        <motion.div
-                            initial={{ scaleX: 0 }}
-                            animate={{ scaleX: 1 }}
-                            transition={{ duration: MIN_MS / 1000, ease: 'easeInOut' }}
-                            style={{ transformOrigin: '0% 50%' }}
-                            className="h-full w-full bg-gradient-to-r from-red-600 to-orange-400 shadow-[0_0_12px_rgba(239,68,68,0.8)]"
-                        />
+                        <div className="h-full w-full origin-left motion-safe:animate-[loader-fill_0.7s_ease-in-out] bg-gradient-to-r from-orange-600 to-yellow-300 shadow-[0_0_12px_rgba(249,115,22,0.8)]" />
                     </div>
                 </motion.div>
             )}

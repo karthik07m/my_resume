@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { sfx } from '@/lib/sfx'
 
@@ -9,8 +9,9 @@ const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'ar
 let on = false
 const subs = new Set<() => void>()
 
-// Sage Mode: a site-wide palette shift + faster hero shape. Toggled by the Konami code, typing "sage",
-// or tapping the hero badge three times (mobile).
+// Sage Mode: the hero, the nav and the stars go orange and gold, a glow of natural energy frames the whole screen,
+// and the hero shape spins faster. It never recolours the themed sections below the hero.
+// Toggled by the frog button, the switch in About, the Konami code, typing "sage".
 export const sage = {
     isOn: () => on,
     toggle() {
@@ -20,6 +21,9 @@ export const sage = {
         sfx.sage()
     },
 }
+
+// Whether Sage Mode is on, for anything that wants to show it (Naruto's eyes in the About section).
+export const useSage = () => useSyncExternalStore((cb) => { subs.add(cb); return () => { subs.delete(cb) } }, () => on, () => false)
 
 export default function SageMode() {
     const [banner, setBanner] = useState<string | null>(null)
@@ -58,11 +62,13 @@ export default function SageMode() {
             onClick={() => sage.toggle()}
             aria-pressed={active}
             aria-label={active ? 'Release Sage Mode' : 'Enter Sage Mode'}
-            title={active ? 'Release Sage Mode' : 'Sage Mode (or: Konami code, type "sage", tap the hero badge 3x)'}
+            title={active ? 'Release Sage Mode' : 'Sage Mode (or: Konami code, type "sage")'}
             className={`fixed bottom-4 left-[3.75rem] z-[60] w-9 h-9 rounded-full bg-black/70 backdrop-blur border text-base leading-none transition-colors ${active ? 'border-orange-400 shadow-[0_0_14px_rgba(251,146,60,0.8)] bg-orange-500/20' : 'border-orange-500/30 hover:bg-orange-500/10'}`}
         >
             🐸
         </button>
+        {/* natural energy at the edges of the screen for as long as Sage Mode is on */}
+        <div aria-hidden className={`fixed inset-0 z-[55] pointer-events-none transition-opacity duration-700 shadow-[inset_0_0_140px_rgba(251,146,60,0.45)] ${active ? 'opacity-100' : 'opacity-0'}`} />
         <AnimatePresence>
             {banner && (
                 <motion.div
