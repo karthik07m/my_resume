@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import BugSmasher from '@/components/games/BugSmasher'
 import MagneticButton from '@/components/ui/MagneticButton'
 import resume from '@/data/resume.json'
@@ -11,10 +11,17 @@ import { KanjiWatermark, MangaSfx } from '@/components/ui/MangaText'
 const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 const handle = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
 
+// The email is kept out of the page's HTML and scripts as plain text, so simple scrapers don't pick it up:
+// resume.json holds it reversed and base64-encoded, and it is put together in the browser once the page has loaded.
+// The prerendered HTML and the first render have no email at all.
+const decodeEmail = (code: string) => atob(code).split('').reverse().join('')
+const noSubscribe = () => () => {}
+const useEmail = () => useSyncExternalStore(noSubscribe, () => decodeEmail(resume.emailCode), () => '')
+
 // Every channel is a breathing style, credited to the swordsman who uses that form in canon and marked with their
 // haori. The colour drives the accent, and hovering a channel performs its form.
 const CHANNELS = [
-    { name: 'Email', value: resume.email, href: `mailto:${resume.email}`, breath: 'Thunder Breathing', kanji: '雷の呼吸', form: 'First Form: Thunderclap and Flash', formKanji: '壱ノ型 霹靂一閃', user: 'Zenitsu Agatsuma', haori: 'zenitsu', color: '#facc15', slash: 'thunder' },
+    { name: 'Email', value: '', href: '', breath: 'Thunder Breathing', kanji: '雷の呼吸', form: 'First Form: Thunderclap and Flash', formKanji: '壱ノ型 霹靂一閃', user: 'Zenitsu Agatsuma', haori: 'zenitsu', color: '#facc15', slash: 'thunder' },
     { name: 'LinkedIn', value: handle(resume.links.linkedin), href: resume.links.linkedin, breath: 'Water Breathing', kanji: '水の呼吸', form: 'Eleventh Form: Dead Calm', formKanji: '拾壱ノ型 凪', user: 'Giyu Tomioka', haori: 'giyu', color: '#38bdf8', slash: 'water' },
     { name: 'GitHub', value: handle(resume.links.github), href: resume.links.github, breath: 'Flame Breathing', kanji: '炎の呼吸', form: 'Ninth Form: Rengoku', formKanji: '玖ノ型 煉獄', user: 'Kyojuro Rengoku', haori: 'rengoku', color: '#f97316', slash: 'flame' },
     { name: 'Play Store', value: 'Visa Sage · Coinly', href: resume.projects[0].url, breath: 'Wind Breathing', kanji: '風の呼吸', form: 'First Form: Dust Whirlwind Cutter', formKanji: '壱ノ型 塵旋風・削ぎ', user: 'Sanemi Shinazugawa', haori: 'sanemi', color: '#4ade80', slash: 'wind' },
@@ -167,19 +174,20 @@ export default function Contact() {
     const [copied, setCopied] = useState(false)
     const sectionRef = useRef<HTMLElement>(null)
     const near = useInView(sectionRef, { margin: '20% 0px' })
+    const email = useEmail()
 
     const sendCrow = () => {
         setCrow(true)
         sfx.whoosh()
-        setTimeout(() => { window.location.href = `mailto:${resume.email}` }, 900)
+        setTimeout(() => { window.location.href = `mailto:${email}` }, 900)
     }
     const copyEmail = async () => {
         try {
-            await navigator.clipboard.writeText(resume.email)
+            await navigator.clipboard.writeText(email)
             setCopied(true)
             sfx.click()
             setTimeout(() => setCopied(false), 1800)
-        } catch { window.location.href = `mailto:${resume.email}` }
+        } catch { window.location.href = `mailto:${email}` }
     }
 
     return (
@@ -285,7 +293,7 @@ export default function Contact() {
                             onClick={copyEmail}
                             className="w-full sm:w-auto px-8 py-4 border border-white/20 text-white font-bold text-sm tracking-widest hover:bg-white/10 hover:border-pink-400/60 transition-colors font-mono"
                         >
-                            {copied ? 'COPIED ✓' : resume.email}
+                            {copied ? 'COPIED ✓' : email || 'Copy email'}
                         </button>
                     </motion.div>
 
@@ -305,7 +313,8 @@ export default function Contact() {
                             transition={{ delay: 0.15 + i * 0.07, type: 'spring', stiffness: 220, damping: 24 }}
                         >
                             <a
-                                href={c.href}
+                                // the Email card gets its address only once the browser has put it together
+                                href={c.name === 'Email' ? (email ? `mailto:${email}` : '#contact') : c.href}
                                 download={c.download || undefined}
                                 target={c.href.startsWith('http') ? '_blank' : undefined}
                                 rel="noopener noreferrer"
@@ -319,7 +328,7 @@ export default function Contact() {
                                         <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--breath)] opacity-90 whitespace-nowrap"><span className="font-sans font-bold not-italic tracking-normal mr-1.5">{c.kanji}</span><span className="hidden xl:inline">{c.breath}</span></span>
                                     </span>
                                     <span className="flex items-baseline justify-between gap-3">
-                                        <span className="min-w-0 text-sm text-white/60 truncate group-hover:text-white/90 transition-colors">{c.value}</span>
+                                        <span className="min-w-0 text-sm text-white/60 truncate group-hover:text-white/90 transition-colors">{c.name === 'Email' ? email || 'Email me' : c.value}</span>
                                         <span className="hidden sm:inline text-[10px] text-white/65 whitespace-nowrap">{c.user}</span>
                                     </span>
                                     <span className="block text-[10px] font-mono text-white/60 group-hover:text-[var(--breath)] transition-colors truncate"><span className="sm:hidden">{c.user} · </span>{c.formKanji} · <span className="xl:hidden">{c.breath}, </span>{c.form}</span>
