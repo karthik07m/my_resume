@@ -388,6 +388,7 @@ const THEMES: Record<string, Theme> = {
 }
 
 type Job = (typeof resume.experience)[number]
+const SHOWN_BULLETS = 6
 
 function JobCard({ job, arc, active, arcNo }: { job: Job; arc: Arc; active: boolean; arcNo: number }) {
     const t = THEMES[arc.id]
@@ -462,8 +463,12 @@ function JobCard({ job, arc, active, arcNo }: { job: Job; arc: Arc; active: bool
                             )}
                         </div>
 
-                        <ul className={clsx('text-[15px] md:text-base leading-relaxed mb-5 space-y-2 lg:mb-0 lg:col-start-2 lg:row-start-1 lg:row-span-2', t.text)}>
-                            {job.bullets.map((bullet, bi) => (
+                        <div className={clsx('text-[15px] md:text-base leading-relaxed mb-5 lg:mb-0 lg:col-start-2 lg:row-start-1 lg:row-span-2', t.text)}>
+                        {[job.bullets.slice(0, SHOWN_BULLETS), job.bullets.slice(SHOWN_BULLETS)].map((part, pi) => {
+                            if (!part.length) return null
+                            const list = (
+                        <ul key={pi} className={clsx('space-y-2', pi && 'mt-2')}>
+                            {part.map((bullet, i) => { const bi = i + pi * SHOWN_BULLETS; return (
                                 <li key={bullet} className="relative flex gap-2.5">
                                     <span className={clsx('shrink-0 select-none', t.marker)} aria-hidden>{t.bullet}</span>
                                     <span>{bullet}</span>
@@ -479,8 +484,21 @@ function JobCard({ job, arc, active, arcNo }: { job: Job; arc: Arc; active: bool
                                         />
                                     )}
                                 </li>
-                            ))}
+                            ) })}
                         </ul>
+                            )
+                            // A long log reads as a wall: the rest of it waits one click away, still in the page for search.
+                            return pi === 0 ? list : (
+                                <details key={pi} className="group mt-3">
+                                    <summary className={clsx('cursor-pointer w-fit text-xs font-mono uppercase tracking-widest underline decoration-dotted underline-offset-4', t.label)}>
+                                        <span className="group-open:hidden">+{part.length} more log entries</span>
+                                        <span className="hidden group-open:inline">Close the log</span>
+                                    </summary>
+                                    {list}
+                                </details>
+                            )
+                        })}
+                        </div>
 
                         {job.award && (
                             // The haul from this island: awards and recognition, set apart like the highlight on the PDF

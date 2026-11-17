@@ -2,55 +2,25 @@
 
 import Section from '@/components/ui/Section'
 import resume from '@/data/resume.json'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { clsx } from 'clsx'
-import { sage, useSage } from '@/components/ui/SageMode'
 import JutsuCards, { SharinganEye } from './Jutsu'
 import BellTest from './BellTest'
-import { KanjiWatermark, MangaSfx } from '@/components/ui/MangaText'
+import { LeafSymbol } from './HiddenLeafScene'
 
 const skillCount = resume.skills.reduce((n, g) => n + g.items.length, 0)
 
-// The marks a shinobi carries, drawn in the current text colour.
-type Mark = (p: { className?: string }) => React.ReactElement
-const Kunai: Mark = ({ className }) => (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-        <path d="M12 1 L16.5 9.5 L12 14 L7.5 9.5 Z" />
-        <rect x="11" y="13.5" width="2" height="5" opacity="0.7" />
-        <circle cx="12" cy="20.6" r="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-)
-const Shuriken: Mark = ({ className }) => (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" fillRule="evenodd" aria-hidden>
-        <path d="M12 1 L14.6 9.4 L23 12 L14.6 14.6 L12 23 L9.4 14.6 L1 12 L9.4 9.4 Z M12 10 a2 2 0 1 0 0.01 0 Z" />
-    </svg>
-)
-const Scroll: Mark = ({ className }) => (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-        <rect x="6" y="7" width="12" height="10" opacity="0.35" />
-        <rect x="2.5" y="5" width="4.5" height="14" rx="2.2" />
-        <rect x="17" y="5" width="4.5" height="14" rx="2.2" />
-        <path d="M9 10.5 h6 M9 13.5 h4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-)
-// The Hidden Leaf: a spiral that runs out into a pointed tip.
-const Leaf: Mark = ({ className }) => (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M 13 12 a 1.6 1.6 0 0 1 3.2 0 a 3.4 3.4 0 0 1 -6.8 0 a 5.2 5.2 0 0 1 10.4 0 a 7 7 0 0 1 -12 4.9" />
-        <path d="M 7.8 16.9 L 2 20 L 4.2 13.2 Z" fill="currentColor" />
-    </svg>
-)
-
-const stats: { label: string; value: string; Icon: Mark }[] = [
-    { label: 'Appian Experience', value: '7+ Years', Icon: Kunai },
-    { label: 'Level', value: 'Senior', Icon: Leaf },
-    { label: 'Certification', value: 'Appian L2', Icon: Scroll },
-    { label: 'Tech Stack', value: `${skillCount}+`, Icon: Shuriken },
+const clientCount = new Set(resume.experience.map(job => job.client).filter(Boolean)).size
+const stats = [
+    { label: 'Appian experience', value: '7+ years' },
+    { label: 'Clients', value: String(clientCount) },
+    { label: 'Certification', value: 'Appian L2' },
+    { label: 'Technologies', value: String(skillCount) },
 ]
 
 // How far an iris can travel from the centre of its eye, in px. Eyes are wider than they are tall.
-const REACH = { x: 9, y: 4 }
+const REACH = { x: 4, y: 3 }
 const SETTLE_MS = 60 // how quickly the gaze closes on its target: quick like a glance, not a slow glide
 const IDLE_MS = 2500 // with nothing moving for this long, the eyes come back to look at you
 
@@ -67,10 +37,11 @@ function SharinganEyes() {
     const box = useRef<HTMLDivElement>(null)
     const watching = useInView(box)
     const [awake, setAwake] = useState(false)
+    const reducedMotion = useReducedMotion()
 
     useEffect(() => {
         const el = box.current
-        if (!el || !watching) return
+        if (!el || !watching || reducedMotion) return
         const eyes = [...el.querySelectorAll<HTMLElement>('[data-eye]')]
         const gaze = { x: 0, y: 0, tx: 0, ty: 0 } // where the pair is looking and where it is heading, each -1..1
         let frame = 0, last = 0, idle = 0, near = false
@@ -130,16 +101,16 @@ function SharinganEyes() {
             clearTimeout(idle)
             cancelAnimationFrame(frame)
         }
-    }, [watching])
+    }, [watching, reducedMotion])
 
     return (
-        <div ref={box} className="inline-flex gap-1.5" title="Sharingan" aria-hidden>
-            {['left', 'right'].map((side) => (
-                <div key={side} data-eye className="relative w-12 h-7 rounded-[50%] bg-zinc-100 overflow-hidden shadow-[inset_0_-2px_3px_rgba(0,0,0,0.18)]">
-                    <div className="absolute left-1/2 top-1/2 w-[22px] h-[22px] -ml-[11px] -mt-[11px] will-change-transform [transform:translate(var(--gx,0px),var(--gy,0px))_scale(var(--sx,1),var(--sy,1))]">
-                        <SharinganEye live={watching} awake={awake} glow={false} />
+        <div ref={box} className="sharingan-signet" title="Sharingan" aria-hidden>
+            {['tomoe'].map((side) => (
+                <div key={side} data-eye className="relative w-8 h-8 rounded-full bg-[#17090c] border border-red-500/40 p-[3px] overflow-hidden shadow-[0_0_12px_rgba(239,68,68,0.2)]">
+                    <div className="absolute inset-[3px] will-change-transform [transform:translate(var(--gx,0px),var(--gy,0px))_scale(var(--sx,1),var(--sy,1))]">
+                        <SharinganEye live={watching && !reducedMotion} awake={awake} glow={false} />
                         {/* the glint is a reflection on the surface, so it lags behind the iris as the eye turns under it */}
-                        <div className="absolute left-[24%] top-[16%] w-[24%] h-[24%] rounded-full bg-white/85 [transform:translate(calc(var(--gx,0px)*-0.35),calc(var(--gy,0px)*-0.35))]" />
+                        <div className="absolute left-[24%] top-[16%] w-[24%] h-[24%] rounded-full bg-white/70 [transform:translate(calc(var(--gx,0px)*-0.35),calc(var(--gy,0px)*-0.35))]" />
                     </div>
                     {/* the shadow of the upper lid, which comes down with the gaze */}
                     <div className="absolute inset-x-0 -top-1 h-[62%] bg-gradient-to-b from-black/60 via-black/15 to-transparent [transform:translateY(calc(var(--gy,0px)*0.7))]" />
@@ -151,130 +122,67 @@ function SharinganEyes() {
     )
 }
 
-// Naruto's Sage Mode, as a switch: the toad's eye with its bar pupil and the orange around it. It is the same Sage
-// Mode as the frog button in the corner, so the whole site goes with it.
-function SageSwitch() {
-    const on = useSage()
-    return (
-        <button
-            type="button"
-            onClick={() => sage.toggle()}
-            aria-pressed={on}
-            className={clsx('flex items-center gap-3 rounded-full border pl-2 pr-5 py-2 text-left transition-colors', on ? 'border-orange-400 bg-orange-500/20' : 'border-white/15 bg-black/50 hover:border-orange-400/70 hover:bg-orange-500/10')}
-        >
-            <svg viewBox="0 0 60 40" className="w-14 shrink-0" aria-hidden>
-                <path d="M 1 20 Q 30 -8 59 20 Q 30 48 1 20 Z" fill="#f97316" />
-                <path d="M 8 20 Q 30 2 52 20 Q 30 38 8 20 Z" fill="#fefce8" stroke="#7c2d12" strokeWidth="1" />
-                <circle cx="30" cy="20" r="11.5" fill="#facc15" stroke="#a16207" strokeWidth="1" />
-                <rect x="20" y="17.4" width="20" height="5.2" rx="2.2" fill="#111827" />
-            </svg>
-            <span>
-                <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">Naruto&apos;s power-up</span>
-                <span className="block text-sm font-black text-white">{on ? 'Release Sage Mode' : 'Enter Sage Mode'}</span>
-            </span>
-        </button>
-    )
-}
-
-const rise = { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
-
 export default function About() {
-    const sageOn = useSage()
+    const reducedMotion = useReducedMotion()
+    // Everything that loops in this section runs only while it is on screen (`data-live`, see globals.css).
+    const fx = useRef<HTMLDivElement>(null)
+    const live = useInView(fx)
+    useEffect(() => { fx.current?.closest('section')?.toggleAttribute('data-live', live) }, [live])
+    const aside = useRef<HTMLElement>(null)
+    const cloned = useInView(aside, { once: true, amount: 0.5 })
+    const reveal = {
+        initial: reducedMotion ? false as const : { opacity: 0, y: 12 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true },
+        transition: { duration: 0.3 },
+    }
     return (
-        // Sage Mode is orange and gold, which this section already is: it keeps its colours and warms up.
-        <Section id="about" className="relative py-12 md:py-20">
-            <div className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-700 bg-[radial-gradient(70%_45%_at_25%_8%,rgba(251,146,60,0.28),transparent_70%),radial-gradient(60%_40%_at_85%_60%,rgba(250,204,21,0.14),transparent_70%)]', sageOn ? 'opacity-100' : 'opacity-0')} aria-hidden />
-            {/* Title on the left; Kakashi's bell test and the Sage Mode switch on the right */}
-            <motion.div {...rise} className="relative z-20 flex flex-wrap items-end justify-between gap-6 mb-8 md:mb-10">
-                <div className="relative isolate">
-                    {/* 忍: shinobi */}
-                    <KanjiWatermark text="忍" color="#fb923c" className="-left-3 md:-left-12 -top-6" />
-                    <div className="inline-flex items-center gap-3 px-3 py-2 mb-4 rounded-full bg-orange-500/10 border border-orange-500/20">
-                        <SharinganEyes />
-                        <span className="text-sm font-bold tracking-[0.2em] uppercase text-orange-500">Hidden Leaf · Team 7</span>
-                    </div>
-                    {/* fits the heading, so the sticker beside it sits just past the title, not out by the buttons */}
-                    <div className="relative mb-4 md:w-fit">
-                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 [filter:drop-shadow(0_2px_6px_rgba(0,0,0,0.95))]">
-                            THE CODE I LIVE BY
-                        </h2>
-                        {/* Naruto's verbal tic, which the English dub turned into "Believe it!" */}
-                        <MangaSfx jp="だってばよ!" en="Believe it!" color="#fdba74" tilt={-6} className="mt-3 md:mt-0 md:absolute md:left-full md:ml-4 md:-top-4" />
-                    </div>
-                    <div className="h-1 w-32 bg-orange-500 rounded-full mb-3" />
-                    {/* what Naruto calls the code he lives by */}
-                    <p className="font-mono text-xs uppercase tracking-[0.3em] text-orange-300">忍道 · Nindō, my ninja way</p>
-                </div>
-                <div className="flex flex-col items-start sm:items-end gap-3">
-                    <BellTest />
-                    <SageSwitch />
-                </div>
-            </motion.div>
-
-            {/* The bio beside the numbers and the training, top-aligned so neither column floats in empty space */}
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
-                <div className="lg:col-span-7 relative">
-                    <motion.div {...rise} className="bg-black/80 border border-orange-500/30 p-5 sm:p-8 rounded-2xl relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
-                        <h3 className="text-2xl font-bold mb-5 flex items-center gap-3 text-white">
-                            <Scroll className="w-8 h-8 text-orange-400" /> Mission Report
-                        </h3>
-                        {/* the classification stamped on a mission scroll: S is the highest there is */}
-                        <div className="absolute top-4 right-4 sm:top-6 sm:right-6 rotate-6 rounded border-2 border-orange-400/70 px-2 py-1 text-center text-orange-300" title="Mission rank: S">
-                            <div className="font-mono text-[8px] uppercase tracking-[0.25em]">Rank</div>
-                            <div className="text-2xl font-black leading-none">S</div>
-                        </div>
-                        <div className="space-y-4 text-base sm:text-lg text-white/80 leading-relaxed">
-                            {resume.about.map((paragraph) => (
-                                <p key={paragraph}>{paragraph}</p>
-                            ))}
-                        </div>
-                    </motion.div>
-                </div>
-
-                <div className="lg:col-span-5 space-y-5 lg:space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        {stats.map((stat, index) => (
-                            <motion.div key={stat.label} {...rise} transition={{ delay: index * 0.06 }} className="bg-black/60 border border-white/10 p-4 rounded-xl">
-                                <stat.Icon className="w-7 h-7 mb-2 text-orange-400" />
-                                <div className="text-xl sm:text-2xl font-bold text-white font-mono">{stat.value}</div>
-                                <div className="text-xs font-bold uppercase tracking-wider text-white/50">{stat.label}</div>
-                            </motion.div>
-                        ))}
-                    </div>
-                    {/* Training Arc (Education) */}
-                    <motion.div {...rise} className="bg-black/60 border border-white/10 p-4 sm:p-5 rounded-xl">
-                        <h3 className="text-lg font-bold mb-3 text-orange-400 flex items-center gap-2">
-                            <Leaf className="w-5 h-5" /> Training Arc
-                        </h3>
-                        <ul className="space-y-2 text-sm text-white/70">
-                            {resume.education.map((edu) => (
-                                <li key={edu.degree} className="flex flex-col sm:flex-row sm:gap-3">
-                                    <span className="font-mono text-white/60 shrink-0">{edu.period}</span>
-                                    <span>{edu.degree}, {edu.school}{edu.note && <span className="text-white/60"> · {edu.note}</span>}</span>
-                                </li>
-                            ))}
-                            {resume.certifications.map((cert) => (
-                                <li key={cert} className="flex flex-col sm:flex-row sm:gap-3">
-                                    <span className="font-mono text-orange-300 shrink-0">Certified</span>
-                                    <span>{cert}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </motion.div>
-                </div>
+        <Section id="about" className="naruto-about relative md:min-h-0 justify-start py-10 md:py-14">
+            {/* Leaves of the Hidden Leaf drifting down through the section. */}
+            <div ref={fx} className="naruto-fx" aria-hidden>
+                {Array.from({ length: 9 }, (_, i) => <svg key={i} viewBox="0 0 24 24" className="konoha-leaf" style={{ left: `${4 + i * 11}%`, animationDuration: `${9 + (i * 5) % 7}s`, animationDelay: `${-(i * 3.7) % 11}s`, scale: 0.8 + (i % 3) * 0.3 }}><path d="M12 2C6 6 4 12 6 18c1 2 3 3.5 6 4 3-.5 5-2 6-4 2-6 0-12-6-16Z" fill="currentColor" /><path d="M12 5v16" stroke="#14532d" strokeWidth="1.2" /></svg>)}
             </div>
-
-            {/* Skills: one technique per group, across the full width */}
-            <motion.div {...rise} className="relative z-10 mt-10 md:mt-12">
-                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-5">
-                    <h3 className="text-xl font-bold text-orange-400 flex items-center gap-2">
-                        <Shuriken className="w-5 h-5" /> Skills & Superpowers
-                    </h3>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/60">Four Team 7 moments · hold or tap each emblem</p>
+            <motion.header {...reveal} className="relative mb-6">
+                <LeafSymbol className="leaf-mark" />
+                <div className="relative flex items-center gap-3 mb-3 pr-12">
+                    <SharinganEyes />
+                    <p className="section-kicker">Personnel file · Hidden Leaf</p>
                 </div>
-                <JutsuCards />
-            </motion.div>
+                <h2 className="about-title text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-300">MANI KARTHIK</h2>
+                {/* Kakashi's bell test: the bells dodge the pointer, the third grab catches one, both is a pass */}
+                <div className="relative mt-4 md:mt-0 md:absolute md:right-0 md:bottom-0"><BellTest /></div>
+            </motion.header>
+
+            <div className="grid lg:grid-cols-12 gap-4 items-start">
+                <motion.article {...reveal} className="about-overview dossier-card lg:col-span-7 p-5 sm:p-6">
+                    <div className="dossier-heading mb-4">
+                        <p className="section-kicker">Mission profile · 001</p>
+                        <h3 className="mt-1 text-xl font-bold text-white">{resume.title}</h3>
+                    </div>
+                    <p className="mt-3 text-base leading-relaxed text-zinc-300">I build enterprise Appian applications, tune the databases behind them, and help teams deliver reliable software.</p>
+                    <ul className="mt-4 space-y-3 text-sm leading-relaxed text-zinc-400">
+                        <li><strong className="text-zinc-200 font-semibold">Enterprise delivery:</strong> federal compliance and funding at USAC, loan onboarding for HSBC, and scheduling for IQVIA.</li>
+                        <li><strong className="text-zinc-200 font-semibold">Technical leadership:</strong> performance tuning, reusable design patterns, code reviews, and mentoring junior developers.</li>
+                        <li><strong className="text-zinc-200 font-semibold">Beyond Appian:</strong> React, Java, and Flutter for web apps, mobile products, and integrations.</li>
+                    </ul>
+                    <details className="about-background mt-4 border-t border-white/10 pt-3">
+                        <summary className="cursor-pointer w-fit py-2 text-sm font-semibold text-red-300 rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-300">Full background</summary>
+                        <div className="mt-3 space-y-3 text-sm leading-relaxed text-zinc-400">{resume.about.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
+                    </details>
+                </motion.article>
+                <aside ref={aside} data-cloned={cloned} className="about-aside relative lg:col-span-5 space-y-4">
+                    {cloned && <span className="jutsu-shout clone-shout" aria-hidden>影分身の術<small>Shadow Clone Jutsu</small></span>}
+                    <dl className="grid grid-cols-2 gap-3">
+                        {stats.map(stat => <div key={stat.label} className="about-stat px-4 py-3"><dt className="about-stat-label">{stat.label}</dt><dd className="mt-1 text-xl font-bold text-white">{stat.value}</dd></div>)}
+                    </dl>
+                    <div className="about-education p-4">
+                        <h3 className="text-sm font-semibold text-white mb-3">Education & certifications</h3>
+                        <ul className="space-y-3">{resume.education.map(edu => <li key={edu.degree}><div className="flex flex-wrap justify-between gap-x-3 gap-y-1 text-sm"><span className="text-zinc-200 font-medium">{edu.degree}</span><span className="text-xs text-zinc-500">{edu.period}</span></div><p className="mt-1 text-xs text-zinc-400">{edu.school}{edu.note && ` · ${edu.note}`}</p></li>)}</ul>
+                        <div className="mt-3 pt-3 border-t border-white/10 flex flex-wrap gap-2">{resume.certifications.map(cert => <span key={cert} className="credential-tag">{cert}</span>)}</div>
+                    </div>
+                </aside>
+            </div>
+            <motion.div {...reveal} className="mt-7"><JutsuCards /></motion.div>
         </Section>
     )
 }

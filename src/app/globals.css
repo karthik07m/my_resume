@@ -120,22 +120,6 @@ html[data-haki] .haki-shake {
   96.5% { transform: scaleY(1); }
 }
 
-/* About (sections/Kurama.tsx): a Nine-Tails tail swaying from its root, Kurama blinking, and chakra bubbles rising
-   through the section. */
-@keyframes tail-sway {
-  0%, 100% { transform: rotate(-7deg); }
-  50% { transform: rotate(7deg); }
-}
-@keyframes kurama-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  96% { transform: scaleY(0.1); }
-}
-@keyframes chakra-rise {
-  0% { transform: translateY(0) scale(0.6); opacity: 0; }
-  15% { opacity: 1; }
-  100% { transform: translateY(-85vh) scale(1.1); opacity: 0; }
-}
-
 /* Experience timeline: the ship rocking on its way down. */
 @keyframes rock {
   0%, 100% { transform: rotate(-6deg); }
@@ -175,4 +159,114 @@ html[data-haki] .haki-shake {
 @media (prefers-reduced-motion: reduce) {
   .ki-aura g, .ki-aura polyline, [data-charging] .ki-shake { animation: none; }
   .ki-aura g:first-of-type { opacity: 1; }
+}
+
+/* About is the Hidden Leaf dossier: restrained cinnabar, warm ink and compact file-card framing. */
+.naruto-about {
+  --leaf-red: #d9434b;
+  --leaf-gold: #dfb86b;
+  background: radial-gradient(ellipse at 88% 2%, rgba(104, 20, 31, .18), transparent 28rem), #020203;
+}
+.section-kicker { color: #e77878; font-size: 10px; font-weight: 700; letter-spacing: .17em; line-height: 1.4; text-transform: uppercase; }
+.sharingan-signet { display: inline-flex; flex: none; align-items: center; justify-content: center; }
+.about-title { background-image: linear-gradient(100deg, #ef4444 0%, #f0a34b 82%); }
+.about-overview, .about-stat, .about-education, .skill-group {
+  background: linear-gradient(135deg, #101013 0%, #080809 78%);
+  border: 1px solid #ffffff19; border-radius: 5px;
+  box-shadow: 0 12px 34px #0005;
+}
+.about-overview { border-left: 3px solid var(--leaf-red); background: linear-gradient(115deg, #30111655 0%, #101012 34%, #080809 100%); }
+.about-stat { border-top-color: #d9434b55; }
+.about-stat-label { color: #a1a1aa; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.about-education { border-top: 2px solid #d9434b66; }
+.credential-tag { display: inline-flex; padding: 4px 7px; border: 1px solid #d9434b38; color: #e7c7bd; font-size: 10px; line-height: 1.3; }
+.about-background summary::marker { color: #e77878; }
+.skill-group { border-color: #ffffff24; transition: border-color .2s, background-color .2s; }
+.skill-group:focus-within, .skill-group:hover { border-color: #d9434b80; }
+.skill-filter {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 7px 11px;
+  border: 1px solid #ffffff17; border-radius: 4px; background: #0a0a0c;
+  color: #a1a1aa; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: border-color .16s, background .16s, color .16s, transform .16s;
+}
+.jutsu-emblem { flex: none; width: 24px; height: 24px; }
+.jutsu-emblem .chakra-seal * { stroke-width: 9px; }
+.skill-filter:hover { color: #fafafa; border-color: #d9434b75; transform: translateY(-1px); }
+.skill-filter.is-active { color: #fff0e5; border-color: #d9434baa; background: linear-gradient(100deg, #47191f, #1a1012); box-shadow: inset 0 -2px #e05b5f; }
+.skill-filter:focus-visible { outline: 2px solid #f06b70; outline-offset: 3px; }
+.skill-context { border-color: #d9434b55; }
+.skill-context-label { color: #dfb86b; font-size: 9px; font-weight: 700; letter-spacing: .16em; }
+.skill-chip, .skills-copy {
+  display: inline-flex; align-items: center; min-height: 34px; padding: 7px 10px;
+  border-radius: 3px; border: 1px solid #ffffff19; background: #09090b;
+  color: #d4d4d8; font-size: 13px; line-height: 1.4; cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.skill-chip:hover { color: #fff; border-color: #d9434b88; background: #41171d; }
+.skill-chip.is-selected { color: #ffe4bc; border-color: #e4a65a; background: #461a20; box-shadow: inset 0 -2px #dc555b; }
+.skill-chip:focus-visible, .skills-copy:focus-visible { outline: 2px solid #ef696e; outline-offset: 3px; }
+.skills-copy { color: #bbb2af; background: transparent; }
+.skills-copy:hover { color: #fff; border-color: #d9434b77; }
+/* ── About: Naruto in motion. All of it is transform/opacity, and none of it runs while the section is off screen. ── */
+.naruto-about { position: relative; isolation: isolate; }
+.naruto-about:not([data-live]) *, .naruto-about:not([data-live]) *::before, .naruto-about:not([data-live]) *::after { animation-play-state: paused !important; }
+
+/* leaves on the wind, and the village mark turning slowly behind the name */
+.naruto-fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; }
+.konoha-leaf { position: absolute; top: -24px; width: 16px; height: 16px; color: #5fae5a; opacity: 0; animation: leaf-fall 12s linear infinite; }
+@keyframes leaf-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0); opacity: 0; }
+  8% { opacity: .75; }
+  35% { transform: translate3d(-70px, 380px, 0) rotate(210deg); }
+  65% { transform: translate3d(-20px, 720px, 0) rotate(400deg); opacity: .6; }
+  100% { transform: translate3d(-110px, 1150px, 0) rotate(640deg); opacity: 0; }
+}
+.leaf-mark { position: absolute; left: -46px; top: -58px; width: 230px; height: 230px; z-index: -1; color: #d9434b; opacity: .12; stroke-width: .8; animation: spin 80s linear infinite; }
+
+/* manga shout: the jutsu's name, in kanji, over whatever just went off */
+.jutsu-shout {
+  position: absolute; z-index: 5; pointer-events: none; white-space: nowrap; text-align: center;
+  font: italic 900 26px/1.1 ui-sans-serif, system-ui, sans-serif; color: #fff;
+  -webkit-text-stroke: 1px #000; text-shadow: 3px 3px 0 #000; opacity: 0;
+  animation: jutsu-shout 1.5s ease-out forwards;
+}
+.jutsu-shout small { display: block; margin-top: 3px; font: 700 10px/1.3 ui-monospace, monospace; letter-spacing: .24em; text-transform: uppercase; -webkit-text-stroke: 0; text-shadow: 0 1px 3px #000; color: #fed7aa; }
+@keyframes jutsu-shout { 0% { opacity: 0; transform: scale(.5); } 14% { opacity: 1; transform: scale(1.15); } 24% { transform: scale(1); } 78% { opacity: 1; } 100% { opacity: 0; transform: scale(1); } }
+
+/* smoke */
+.poof { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.poof i { position: absolute; left: 50%; top: 50%; width: 40%; aspect-ratio: 1; margin: -20% 0 0 -20%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #d4d4d8 55%, #a1a1aa00 72%); opacity: 0; animation: poof .8s ease-out both; animation-delay: inherit; }
+@keyframes poof { 0% { opacity: .95; transform: rotate(var(--a)) translateX(0) scale(.4); } 100% { opacity: 0; transform: rotate(var(--a)) translateX(95%) scale(1.5); } }
+
+/* The four stats are shadow clones: they arrive in smoke */
+.about-stat { position: relative; }
+.about-stat::after { content: ''; position: absolute; inset: -12%; border-radius: 50%; background: radial-gradient(closest-side, #fff 0, #e4e4e7 45%, transparent 72%); opacity: 0; pointer-events: none; }
+.about-aside[data-cloned=true] .about-stat { animation: clone-pop .4s cubic-bezier(.2, 1.5, .4, 1) backwards; }
+.about-aside[data-cloned=true] .about-stat::after { animation: clone-smoke .55s ease-out backwards; }
+.about-aside[data-cloned=true] .about-stat:nth-child(2), .about-aside[data-cloned=true] .about-stat:nth-child(2)::after { animation-delay: .07s; }
+.about-aside[data-cloned=true] .about-stat:nth-child(3), .about-aside[data-cloned=true] .about-stat:nth-child(3)::after { animation-delay: .14s; }
+.about-aside[data-cloned=true] .about-stat:nth-child(4), .about-aside[data-cloned=true] .about-stat:nth-child(4)::after { animation-delay: .21s; }
+@keyframes clone-pop { from { transform: scale(.4); opacity: 0; } }
+@keyframes clone-smoke { 0% { opacity: .95; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.5); } }
+.clone-shout { left: 50%; top: -8px; translate: -50% -50%; animation-delay: .15s; }
+
+/* Skills: each group is a jutsu. Opening one casts it across the panel; its kanji stays behind as the watermark. */
+.skill-group { position: relative; overflow: hidden; container-type: inline-size; }
+.skill-group > :not(.jutsu-cast) { position: relative; z-index: 1; }
+.jutsu-cast { position: absolute; inset: 0; pointer-events: none; }
+.jutsu-kanji { position: absolute; right: 14px; top: 50%; translate: 0 -50%; text-align: right; font: 900 clamp(44px, 9cqw, 92px)/1 ui-sans-serif, system-ui, sans-serif; color: #d9434b; opacity: .13; animation: kanji-stamp .5s ease-out backwards; }
+.jutsu-kanji small { display: block; font: 700 10px/1.6 ui-monospace, monospace; letter-spacing: .3em; text-transform: uppercase; }
+@keyframes kanji-stamp { 0% { opacity: .9; transform: scale(1.5); } }
+.jutsu-proj { position: absolute; left: -64px; top: 50%; width: 56px; height: 56px; margin-top: -28px; z-index: 2; opacity: 0; animation: jutsu-sweep .75s cubic-bezier(.5, 0, .9, .5) both; }
+@keyframes jutsu-sweep { 0% { opacity: 1; transform: translateX(0) scale(.6); } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(calc(100cqw + 70px)) scale(1.5); } }
+[data-jutsu="1"] .jutsu-proj { animation-duration: .45s; }
+.jutsu-bolts { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; }
+.jutsu-bolts path { opacity: 0; animation: ki-bolt .3s steps(1) 2; }
+/* the Sharingan opens in the middle of the panel and reads it; the summoning seal spins up in smoke */
+:is([data-jutsu="2"], [data-jutsu="3"]) .jutsu-proj { left: 50%; width: 84px; height: 84px; margin: -42px 0 0 -42px; animation: jutsu-open .9s ease-out both; }
+@keyframes jutsu-open { 0% { opacity: 0; transform: scale(.1) rotate(-180deg); } 30% { opacity: 1; transform: scale(1.1) rotate(0); } 70% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(2.4); } }
+.jutsu-cast .poof { left: 50%; right: auto; top: 50%; bottom: auto; width: 200px; height: 200px; margin: -100px 0 0 -100px; animation-delay: .25s; }
+@media (pointer: coarse) { .skill-chip, .skills-copy { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) {
+  .naruto-about *, .naruto-about *::before, .naruto-about *::after { animation: none !important; transition-duration: 0s !important; }
 }

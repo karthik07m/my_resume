@@ -42,7 +42,7 @@ export default function Home() {
             and turning their hues made them the wrong colours. The hero recolours itself; see Hero.tsx. */}
         <div className="relative z-10 haki-shake">
           <div id="hero"><Hero /></div>
-          <div id="about"><About /></div>
+          <About />
           <div id="experience"><Experience /></div>
           <div id="projects"><Projects /></div>
           <div id="contact"><Contact /></div>

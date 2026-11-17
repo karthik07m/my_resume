@@ -77,13 +77,13 @@ export default function SageMode() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[150] pointer-events-none flex items-center justify-center bg-orange-500/15 backdrop-blur-[2px] px-6"
+                    className="fixed bottom-16 left-4 sm:bottom-5 sm:left-28 z-[150] pointer-events-none max-w-[calc(100vw-2rem)] rounded-lg border border-orange-400/40 bg-[#09090b]/95 shadow-lg px-4 py-3"
                 >
-                    <div className="animate-shake text-center">
-                        <div className="text-3xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-300 to-orange-500 drop-shadow-[0_0_30px_rgba(255,153,0,0.6)]">
+                    <div>
+                        <div className="text-sm font-bold tracking-wide text-orange-200">
                             {banner}
                         </div>
-                        <div className="mt-3 font-mono text-xs sm:text-sm tracking-[0.4em] uppercase text-orange-200/80">
+                        <div className="mt-1 text-xs text-zinc-300">
                             {banner.endsWith('ACTIVATED') ? 'Natural energy gathered' : 'Chakra returned to normal'}
                         </div>
                     </div>

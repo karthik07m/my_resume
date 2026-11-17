@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useLenis } from '@/components/SmoothScroll'
 import resume from '@/data/resume.json'
 
@@ -15,13 +15,15 @@ const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 export default function Navigation() {
     const lenisRef = useLenis()
+    const reducedMotion = useReducedMotion()
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         e.preventDefault()
         if (lenisRef.current) {
-            lenisRef.current.scrollTo(href, { offset: -80 })
+            // Lenis already accounts for html's scroll-padding-top.
+            lenisRef.current.scrollTo(href, { immediate: !!reducedMotion })
         } else {
-            document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
+            document.querySelector(href)?.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth' })
         }
     }
 
