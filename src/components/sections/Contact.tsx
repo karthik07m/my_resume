@@ -1,7 +1,8 @@
 'use client'
 
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { useRef, useState, useSyncExternalStore } from 'react'
+import { useRef, useState } from 'react'
+import { useEmail } from '@/lib/email'
 import BugSmasher from '@/components/games/BugSmasher'
 import MagneticButton from '@/components/ui/MagneticButton'
 import resume from '@/data/resume.json'
@@ -10,13 +11,6 @@ import { KanjiWatermark, MangaSfx } from '@/components/ui/MangaText'
 
 const base = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 const handle = (url: string) => url.replace(/\/$/, '').split('/').pop() ?? url
-
-// The email is kept out of the page's HTML and scripts as plain text, so simple scrapers don't pick it up:
-// resume.json holds it reversed and base64-encoded, and it is put together in the browser once the page has loaded.
-// The prerendered HTML and the first render have no email at all.
-const decodeEmail = (code: string) => atob(code).split('').reverse().join('')
-const noSubscribe = () => () => {}
-const useEmail = () => useSyncExternalStore(noSubscribe, () => decodeEmail(resume.emailCode), () => '')
 
 // Every channel is a breathing style, credited to the swordsman who uses that form in canon and marked with their
 // haori. The colour drives the accent, and hovering a channel performs its form.

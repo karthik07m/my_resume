@@ -1,53 +1,13 @@
 'use client'
 
-import { MotionConfig } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import Hero from '@/components/sections/Hero'
-import About from '@/components/sections/About'
-import Experience from '@/components/sections/Experience'
-import Projects from '@/components/sections/Projects'
-import Contact from '@/components/sections/Contact'
-import Navigation from '@/components/ui/Navigation'
-import QuestLog from '@/components/ui/QuestLog'
-import Loader from '@/components/ui/Loader'
-import SageMode from '@/components/ui/SageMode'
-import Haki from '@/components/ui/Haki'
-import SoundToggle from '@/components/ui/SoundToggle'
-import CursorTrail from '@/components/effects/CursorTrail'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import ProResume from '@/components/pro/ProResume'
+import { useView } from '@/lib/view'
 
-// Loaded after the page is interactive, for the same reason as the hero's 3D shape.
-const StarField = dynamic(() => import('@/components/canvas/StarField'), { ssr: false })
+// The plain résumé is prerendered and shown by default. The anime site (three.js, sound, games) is its own chunk,
+// fetched only for visitors who pick it, so a recruiter's page load never pays for it.
+const AnimeSite = dynamic(() => import('@/components/AnimeSite'), { ssr: false })
 
 export default function Home() {
-  const isDesktop = useMediaQuery('(min-width: 768px)')
-  const hasMouse = useMediaQuery('(pointer: fine)')
-  return (
-    <MotionConfig reducedMotion="user" transition={{ type: 'spring', stiffness: 200, damping: 26 }}>
-      <main className="relative w-full min-h-screen bg-black text-white selection:bg-red-500 selection:text-white overflow-x-hidden">
-        {/* Background Stars */}
-        <div className="fixed inset-0 z-0 pointer-events-none sage-shift" aria-hidden>
-          <StarField count={isDesktop ? 4000 : 1200} />
-        </div>
-
-        <Loader />
-        <Navigation />
-        <QuestLog />
-        <SageMode />
-        <Haki />
-        <SoundToggle />
-        {hasMouse && <CursorTrail />}
-
-        {/* No Sage Mode tint on the content: every section below has its own palette (the One Piece arcs most of all),
-            and turning their hues made them the wrong colours. The hero recolours itself; see Hero.tsx. */}
-        <div className="relative z-10 haki-shake">
-          <div id="hero"><Hero /></div>
-          <About />
-          <div id="experience"><Experience /></div>
-          <div id="projects"><Projects /></div>
-          <div id="contact"><Contact /></div>
-        </div>
-      </main>
-    </MotionConfig>
-  )
+  return useView() === 'anime' ? <AnimeSite /> : <ProResume />
 }
