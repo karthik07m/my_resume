@@ -1,5 +1,7 @@
 :HL["/my_resume/_next/static/chunks/7af0e173cf372ed8.css","style"]
-:HL["/my_resume/_next/static/chunks/978cc050903f73ea.css","style"]
+:HL["/my_resume/_next/static/chunks/57d96c25a817ed38.css","style"]
 :HL["/my_resume/_next/static/media/797e433ab948586e-s.p.29207c2f.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/my_resume/_next/static/media/caa3a2e1cccd8315-s.p.3b6cae6d.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"buildId":"Mcm43LU_HseIuZi6pPFJ1","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+:HL["/my_resume/_next/static/media/d38f3bca7db33566-s.p.b6a8de2a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/my_resume/_next/static/chunks/a2df5a5f52148797.css","style"]
+0:{"buildId":"AY3zoWJQIQV7rXF9Akv3e","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
